@@ -2,22 +2,22 @@
     <div class="container py-4 py-lg-5">
         <div class="row g-4">
             <div class="col-6 col-lg-3">
-                <h3 class="footer-title">Ogrenci Not Paylasim</h3>
-                <p class="footer-text mb-0">Turkiye genelindeki ogrenciler icin acik, duzenli ve hizli not platformu.</p>
+                <h3 class="footer-title">Öğrenci Not Paylaşım</h3>
+                <p class="footer-text mb-0">Türkiye genelindeki öğrenciler için açık, düzenli ve hızlı not platformu.</p>
             </div>
             <div class="col-6 col-lg-3">
                 <h3 class="footer-title">Anasayfa</h3>
                 <ul class="footer-list">
-                    <li><a href="index.php">Universiteler</a></li>
+                    <li><a href="index.php">Üniversiteler</a></li>
                     <li><a href="search.php">Dersler</a></li>
-                    <li><a href="#">Giris Yap</a></li>
-                    <li><a href="#">Kayit Ol</a></li>
+                    <li><a href="#">Giriş Yap</a></li>
+                    <li><a href="#">Kayıt Ol</a></li>
                 </ul>
             </div>
             <div class="col-6 col-lg-3">
                 <h3 class="footer-title">Linkler</h3>
                 <ul class="footer-list">
-                    <li><a href="upload.php">Not Yukle</a></li>
+                    <li><a href="upload.php">Not Yükle</a></li>
                     <li><a href="search.php">Not Ara</a></li>
                     <li><a href="#">Topluluk</a></li>
                     <li><a href="#">Duyurular</a></li>
@@ -34,8 +34,8 @@
             </div>
         </div>
         <div class="footer-bottom mt-4 pt-3 d-flex flex-column flex-md-row justify-content-between gap-2">
-            <p class="mb-0">Ogrenci Not Paylasim Platformu</p>
-            <p class="mb-0">Tum haklari saklidir.</p>
+            <p class="mb-0">Öğrenci Not Paylaşım Platformu</p>
+            <p class="mb-0">Tüm hakları saklıdır.</p>
         </div>
     </div>
 </footer>

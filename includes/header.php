@@ -5,7 +5,7 @@ $pageTitle = $pageTitle ?? 'NotShare';
 $pageKey = $pageKey ?? 'home';
 $navItems = [
     ['key' => 'search', 'label' => 'Not Ara', 'href' => 'search.php'],
-    ['key' => 'upload', 'label' => 'Not Yukle', 'href' => 'upload.php'],
+    ['key' => 'upload', 'label' => 'Not Yükle', 'href' => 'upload.php'],
 ];
 ?>
 <!doctype html>
@@ -23,9 +23,9 @@ $navItems = [
         <nav class="navbar navbar-expand-lg navbar-light py-2">
             <a class="navbar-brand brand-mark" href="index.php">
                 <span class="brand-icon" aria-hidden="true"></span>
-                <span>Ogrenci Not Paylasim</span>
+                <span>Öğrenci Not Paylaşım</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Navigasyonu Ac">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Navigasyonu Aç">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="mainNav">
@@ -39,8 +39,8 @@ $navItems = [
                     <?php endforeach; ?>
                 </ul>
                 <div class="d-flex gap-2 auth-actions">
-                    <a class="btn btn-sm btn-outline-primary" href="#">Giris Yap</a>
-                    <a class="btn btn-sm btn-primary" href="#">Kayit Ol</a>
+                    <a class="btn btn-sm btn-outline-primary" href="#">Giriş Yap</a>
+                    <a class="btn btn-sm btn-primary" href="#">Kayıt Ol</a>
                 </div>
             </div>
         </nav>

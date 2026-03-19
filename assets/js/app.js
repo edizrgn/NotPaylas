@@ -3,42 +3,42 @@
 
     const DATA = {
         universities: [
-            { id: 'itu', name: 'Istanbul Teknik Universitesi' },
-            { id: 'ytu', name: 'Yildiz Teknik Universitesi' },
-            { id: 'metu', name: 'Orta Dogu Teknik Universitesi' }
+            { id: 'itu', name: 'İstanbul Teknik Üniversitesi' },
+            { id: 'ytu', name: 'Yıldız Teknik Üniversitesi' },
+            { id: 'metu', name: 'Orta Doğu Teknik Üniversitesi' }
         ],
         faculties: [
-            { id: 'itu-muh', universityId: 'itu', name: 'Muhendislik Fakultesi' },
-            { id: 'itu-fen', universityId: 'itu', name: 'Fen Edebiyat Fakultesi' },
-            { id: 'ytu-muh', universityId: 'ytu', name: 'Muhendislik Fakultesi' },
-            { id: 'metu-eng', universityId: 'metu', name: 'Engineering Faculty' }
+            { id: 'itu-muh', universityId: 'itu', name: 'Mühendislik Fakültesi' },
+            { id: 'itu-fen', universityId: 'itu', name: 'Fen Edebiyat Fakültesi' },
+            { id: 'ytu-muh', universityId: 'ytu', name: 'Mühendislik Fakültesi' },
+            { id: 'metu-eng', universityId: 'metu', name: 'Mühendislik Fakültesi' }
         ],
         departments: [
-            { id: 'itu-ceng', facultyId: 'itu-muh', name: 'Bilgisayar Muhendisligi' },
-            { id: 'itu-ee', facultyId: 'itu-muh', name: 'Elektrik Muhendisligi' },
-            { id: 'ytu-ceng', facultyId: 'ytu-muh', name: 'Bilgisayar Muhendisligi' },
-            { id: 'ytu-math', facultyId: 'ytu-muh', name: 'Matematik Muhendisligi' },
-            { id: 'metu-ceng', facultyId: 'metu-eng', name: 'Computer Engineering' }
+            { id: 'itu-ceng', facultyId: 'itu-muh', name: 'Bilgisayar Mühendisliği' },
+            { id: 'itu-ee', facultyId: 'itu-muh', name: 'Elektrik Mühendisliği' },
+            { id: 'ytu-ceng', facultyId: 'ytu-muh', name: 'Bilgisayar Mühendisliği' },
+            { id: 'ytu-math', facultyId: 'ytu-muh', name: 'Matematik Mühendisliği' },
+            { id: 'metu-ceng', facultyId: 'metu-eng', name: 'Bilgisayar Mühendisliği' }
         ],
         classes: [
-            { id: '1', name: '1. Sinif' },
-            { id: '2', name: '2. Sinif' },
-            { id: '3', name: '3. Sinif' },
-            { id: '4', name: '4. Sinif' }
+            { id: '1', name: '1. Sınıf' },
+            { id: '2', name: '2. Sınıf' },
+            { id: '3', name: '3. Sınıf' },
+            { id: '4', name: '4. Sınıf' }
         ],
         courses: [
             { id: 'calc', departmentId: 'ytu-math', classId: '1', name: 'Calculus I' },
-            { id: 'prog', departmentId: 'itu-ceng', classId: '1', name: 'Programlamaya Giris' },
-            { id: 'data', departmentId: 'itu-ceng', classId: '2', name: 'Veri Yapilari' },
+            { id: 'prog', departmentId: 'itu-ceng', classId: '1', name: 'Programlamaya Giriş' },
+            { id: 'data', departmentId: 'itu-ceng', classId: '2', name: 'Veri Yapıları' },
             { id: 'algo', departmentId: 'metu-ceng', classId: '2', name: 'Algorithms' },
-            { id: 'db', departmentId: 'ytu-ceng', classId: '3', name: 'Veritabani Sistemleri' },
-            { id: 'signals', departmentId: 'itu-ee', classId: '3', name: 'Sayisal Isaret Isleme' },
-            { id: 'net', departmentId: 'ytu-ceng', classId: '4', name: 'Bilgisayar Aglari' }
+            { id: 'db', departmentId: 'ytu-ceng', classId: '3', name: 'Veritabanı Sistemleri' },
+            { id: 'signals', departmentId: 'itu-ee', classId: '3', name: 'Sayısal İşaret İşleme' },
+            { id: 'net', departmentId: 'ytu-ceng', classId: '4', name: 'Bilgisayar Ağları' }
         ],
         topics: [
-            { id: 'limits', courseId: 'calc', name: 'Limit ve Sureklilik' },
+            { id: 'limits', courseId: 'calc', name: 'Limit ve Süreklilik' },
             { id: 'oop', courseId: 'prog', name: 'OOP Temelleri' },
-            { id: 'trees', courseId: 'data', name: 'Agac ve Heap Yapilari' },
+            { id: 'trees', courseId: 'data', name: 'Ağaç ve Heap Yapıları' },
             { id: 'dp', courseId: 'algo', name: 'Dynamic Programming' },
             { id: 'normalization', courseId: 'db', name: 'Normalizasyon' },
             { id: 'fft', courseId: 'signals', name: 'Fourier ve FFT' },
@@ -47,17 +47,16 @@
         notes: [
             {
                 id: 1,
-                title: 'Veri Yapilari Final Ozet',
-                description: 'Agaclar, hash tablolar ve sinavda cikmis kritik sorularin kisa ozetleri.',
-                uploader: 'Ahmet Yilmaz',
+                title: 'Veri Yapıları Final Özet',
+                description: 'Ağaçlar, hash tablolar ve sınavda çıkmış kritik soruların kısa özetleri.',
+                uploader: 'Ahmet Yılmaz',
                 universityId: 'itu',
                 facultyId: 'itu-muh',
                 departmentId: 'itu-ceng',
                 classId: '2',
                 courseId: 'data',
                 topicId: 'trees',
-                audience: 'all',
-                tags: ['final', 'agac', 'hash'],
+                tags: ['final', 'ağaç', 'hash'],
                 views: 4982,
                 downloads: 1364,
                 fileType: 'pdf',
@@ -66,7 +65,7 @@
             {
                 id: 2,
                 title: 'Database Normalization Cheatsheet',
-                description: '1NF-3NF ornekleri ve tablo iliski modelleme adimlari.',
+                description: '1NF-3NF örnekleri ve tablo ilişki modelleme adımları.',
                 uploader: 'Elif C.',
                 universityId: 'ytu',
                 facultyId: 'ytu-muh',
@@ -74,7 +73,6 @@
                 classId: '3',
                 courseId: 'db',
                 topicId: 'normalization',
-                audience: 'department',
                 tags: ['sql', 'normalizasyon', 'cheatsheet'],
                 views: 3110,
                 downloads: 980,
@@ -84,7 +82,7 @@
             {
                 id: 3,
                 title: 'Algorithms Midterm Practice',
-                description: 'Greedy, DP ve grafik problemleri icin ornek cozum seti.',
+                description: 'Greedy, DP ve grafik problemleri için örnek çözüm seti.',
                 uploader: 'Merve D.',
                 universityId: 'metu',
                 facultyId: 'metu-eng',
@@ -92,7 +90,6 @@
                 classId: '2',
                 courseId: 'algo',
                 topicId: 'dp',
-                audience: 'all',
                 tags: ['algorithms', 'dp', 'midterm'],
                 views: 4410,
                 downloads: 1290,
@@ -101,8 +98,8 @@
             },
             {
                 id: 4,
-                title: 'Programlamaya Giris OOP Notlari',
-                description: 'Sinif, nesne, kapsulleme ve kalitim anlatim notlari.',
+                title: 'Programlamaya Giriş OOP Notları',
+                description: 'Sınıf, nesne, kapsülleme ve kalıtım anlatım notları.',
                 uploader: 'Sena K.',
                 universityId: 'itu',
                 facultyId: 'itu-muh',
@@ -110,8 +107,7 @@
                 classId: '1',
                 courseId: 'prog',
                 topicId: 'oop',
-                audience: 'university',
-                tags: ['oop', 'php', 'baslangic'],
+                tags: ['oop', 'php', 'başlangıç'],
                 views: 2800,
                 downloads: 760,
                 fileType: 'docx',
@@ -119,8 +115,8 @@
             },
             {
                 id: 5,
-                title: 'FFT Cikis Sorulari',
-                description: 'Sayisal Isaret Isleme dersinden cikmis final sorulari ve cozum akislari.',
+                title: 'FFT Çıkış Soruları',
+                description: 'Sayısal İşaret İşleme dersinden çıkmış final soruları ve çözüm akışları.',
                 uploader: 'Burak T.',
                 universityId: 'itu',
                 facultyId: 'itu-muh',
@@ -128,8 +124,7 @@
                 classId: '3',
                 courseId: 'signals',
                 topicId: 'fft',
-                audience: 'department',
-                tags: ['fft', 'sinyal', 'cikmis-soru'],
+                tags: ['fft', 'sinyal', 'çıkmış-soru'],
                 views: 2200,
                 downloads: 640,
                 fileType: 'pptx',
@@ -137,8 +132,8 @@
             },
             {
                 id: 6,
-                title: 'Bilgisayar Aglari Routing Ozet',
-                description: 'OSPF, BGP ve paket yonlendirme mantigini tek dokumanda toplayan not.',
+                title: 'Bilgisayar Ağları Routing Özet',
+                description: 'OSPF, BGP ve paket yönlendirme mantığını tek dokümanda toplayan not.',
                 uploader: 'Kaan U.',
                 universityId: 'ytu',
                 facultyId: 'ytu-muh',
@@ -146,7 +141,6 @@
                 classId: '4',
                 courseId: 'net',
                 topicId: 'routing',
-                audience: 'all',
                 tags: ['routing', 'network', 'final'],
                 views: 3870,
                 downloads: 1115,
@@ -155,8 +149,8 @@
             },
             {
                 id: 7,
-                title: 'Calculus Limit Formulleri',
-                description: 'Limit, sureklilik ve turev gecisleri icin hizli tekrar kartlari.',
+                title: 'Calculus Limit Formülleri',
+                description: 'Limit, süreklilik ve türev geçişleri için hızlı tekrar kartları.',
                 uploader: 'Irmak S.',
                 universityId: 'ytu',
                 facultyId: 'ytu-muh',
@@ -164,8 +158,7 @@
                 classId: '1',
                 courseId: 'calc',
                 topicId: 'limits',
-                audience: 'all',
-                tags: ['limit', 'turev', 'vize'],
+                tags: ['limit', 'türev', 'vize'],
                 views: 2080,
                 downloads: 530,
                 fileType: 'image',
@@ -173,8 +166,8 @@
             },
             {
                 id: 8,
-                title: 'Veri Yapilari Cikis Soru Arsivi',
-                description: 'Son 5 yil final sorulari ve kisa cevap anahtarlari.',
+                title: 'Veri Yapıları Çıkış Soru Arşivi',
+                description: 'Son 5 yıl final soruları ve kısa cevap anahtarları.',
                 uploader: 'Nisa P.',
                 universityId: 'itu',
                 facultyId: 'itu-muh',
@@ -182,8 +175,7 @@
                 classId: '2',
                 courseId: 'data',
                 topicId: 'trees',
-                audience: 'university',
-                tags: ['cikmis-soru', 'final', 'veri-yapilari'],
+                tags: ['çıkmış-soru', 'final', 'veri-yapıları'],
                 views: 3560,
                 downloads: 1212,
                 fileType: 'pdf',
@@ -267,8 +259,8 @@
         const course = group.querySelector('select[data-level="course"]');
         const topic = group.querySelector('select[data-level="topic"]');
 
-        populateSelect(university, DATA.universities, university?.dataset.placeholder || 'Seciniz', true);
-        populateSelect(classSelect, DATA.classes, classSelect?.dataset.placeholder || 'Seciniz', true);
+        populateSelect(university, DATA.universities, university?.dataset.placeholder || 'Seçiniz', true);
+        populateSelect(classSelect, DATA.classes, classSelect?.dataset.placeholder || 'Seçiniz', true);
 
         const refreshFaculty = () => {
             if (!faculty) {
@@ -280,7 +272,7 @@
                 ? DATA.faculties.filter((item) => item.universityId === selectedUniversity)
                 : DATA.faculties;
 
-            populateSelect(faculty, list, faculty.dataset.placeholder || 'Seciniz', true);
+            populateSelect(faculty, list, faculty.dataset.placeholder || 'Seçiniz', true);
         };
 
         const refreshDepartment = () => {
@@ -298,7 +290,7 @@
                 list = list.filter((item) => facultyIds.includes(item.facultyId));
             }
 
-            populateSelect(department, list, department.dataset.placeholder || 'Seciniz', true);
+            populateSelect(department, list, department.dataset.placeholder || 'Seçiniz', true);
         };
 
         const refreshCourse = () => {
@@ -317,7 +309,7 @@
                 list = list.filter((item) => item.classId === classSelect.value);
             }
 
-            populateSelect(course, list, course.dataset.placeholder || 'Seciniz', true);
+            populateSelect(course, list, course.dataset.placeholder || 'Seçiniz', true);
         };
 
         const refreshTopic = () => {
@@ -330,7 +322,7 @@
                 ? DATA.topics.filter((item) => item.courseId === selectedCourse)
                 : DATA.topics;
 
-            populateSelect(topic, list, topic.dataset.placeholder || 'Seciniz', true);
+            populateSelect(topic, list, topic.dataset.placeholder || 'Seçiniz', true);
         };
 
         refreshFaculty();
@@ -381,7 +373,6 @@
             classId: normalize(formData.get('class_id')),
             courseId: normalize(formData.get('course_id')),
             topicId: normalize(formData.get('topic_id')),
-            audience: normalize(formData.get('audience')),
             fileType: normalize(formData.get('file_type'))
         };
     }
@@ -403,9 +394,6 @@
             return false;
         }
         if (filters.topicId && note.topicId !== filters.topicId) {
-            return false;
-        }
-        if (filters.audience && note.audience !== filters.audience) {
             return false;
         }
         if (filters.fileType && note.fileType !== filters.fileType) {
@@ -448,7 +436,7 @@
                             <span>${formatNumber(note.downloads)} indirme</span>
                         </div>
                         <div class="meta-row">
-                            <span>${formatNumber(note.views)} goruntulenme</span>
+                            <span>${formatNumber(note.views)} görüntülenme</span>
                             <a href="note-detail.php?id=${note.id}" class="text-primary text-decoration-none fw-semibold">Detay</a>
                         </div>
                     </div>
@@ -484,8 +472,8 @@
             const popular = [...filtered].sort((a, b) => b.downloads - a.downloads).slice(0, 6);
             const latest = [...filtered].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6);
 
-            renderGrid(popularGrid, popular, 'Bu filtreye uygun populer not bulunamadi.');
-            renderGrid(latestGrid, latest, 'Bu filtreye uygun yeni not bulunamadi.');
+            renderGrid(popularGrid, popular, 'Bu filtreye uygun popüler not bulunamadı.');
+            renderGrid(latestGrid, latest, 'Bu filtreye uygun yeni not bulunamadı.');
 
             if (resultCount) {
                 resultCount.textContent = formatNumber(filtered.length);
@@ -602,7 +590,7 @@
             fileList.innerHTML = `
                 <div class="file-item"><strong>${escapeHtml(file.name)}</strong></div>
                 <div class="file-item">Boyut: ${formatNumber(Math.ceil(file.size / 1024))} KB</div>
-                <div class="file-item">Tur: ${escapeHtml(file.type || 'Bilinmiyor')}</div>
+                <div class="file-item">Tür: ${escapeHtml(file.type || 'Bilinmiyor')}</div>
             `;
         };
 
@@ -611,11 +599,11 @@
             const extension = normalize(file.name.split('.').pop());
 
             if (!acceptedExtensions.has(extension)) {
-                errors.push('Desteklenmeyen dosya uzantisi.');
+                errors.push('Desteklenmeyen dosya uzantısı.');
             }
 
             if (file.size > maxBytes) {
-                errors.push('Dosya 25 MB limitini asiyor.');
+                errors.push('Dosya 25 MB limitini aşıyor.');
             }
 
             return errors;
@@ -639,7 +627,7 @@
             }
 
             renderSelectedFile(file);
-            showNotice('Dosya istemci tarafinda dogrulandi. Son kontrol backend tarafinda yapilacak.', 'success');
+            showNotice('Dosya istemci tarafında doğrulandı. Son kontrol backend tarafında yapılacak.', 'success');
         };
 
         const preventDefaults = (event) => {
@@ -681,13 +669,13 @@
 
             const selectedFile = fileInput?.files?.[0];
             if (!selectedFile) {
-                showNotice('Lutfen once bir dosya sec.', 'danger');
+                showNotice('Lütfen önce bir dosya seç.', 'danger');
                 return;
             }
 
-            showNotice('Yukleme istegi hazirlaniyor...', 'info');
+            showNotice('Yükleme isteği hazırlanıyor...', 'info');
             setTimeout(() => {
-                showNotice('Frontend prototipinde dogrulama basarili. Backend endpoint baglantisi sonraki adimda eklenecek.', 'success');
+                showNotice('Frontend prototipinde doğrulama başarılı. Backend endpoint bağlantısı sonraki adımda eklenecek.', 'success');
             }, 650);
         });
     }
@@ -710,7 +698,7 @@
                 return;
             }
 
-            const author = normalize(authorField.value);
+            const author = authorField.value.trim();
             const rating = normalize(ratingField.value);
             const text = textField.value.trim();
 
@@ -768,7 +756,7 @@
             const pageItems = state.filtered.slice(start, start + state.pageSize);
 
             if (!pageItems.length) {
-                resultsContainer.innerHTML = '<div class="empty-state">Filtreye uygun not bulunamadi.</div>';
+                resultsContainer.innerHTML = '<div class="empty-state">Filtreye uygun not bulunamadı.</div>';
                 countElement.textContent = '0';
                 drawPagination();
                 return;
@@ -851,3 +839,4 @@
         }
     });
 })();
+
