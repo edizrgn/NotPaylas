@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-$pageTitle = 'NotShare | Not Yükle';
+$pageTitle = 'Not Bul | Not Yükle';
 $pageKey = 'upload';
 require __DIR__ . '/includes/header.php';
 ?>
@@ -12,7 +12,7 @@ require __DIR__ . '/includes/header.php';
                     <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
                         <div>
                             <h1 class="section-title mb-1">Not Yükleme</h1>
-                            <p class="mb-0 text-secondary">Dosyanı güvenli bir şekilde yükle, hiyerarşiyi seç ve doğru öğrenci kitlesine ulaştır.</p>
+                            <p class="mb-0 text-secondary">Not Bul üzerinde ders notunu güvenli şekilde yükle, hiyerarşiyi seç ve doğru öğrenci kitlesine ulaştır.</p>
                         </div>
                         <span class="badge bg-soft-info text-primary-emphasis">Frontend prototipi</span>
                     </div>
@@ -96,3 +96,4 @@ require __DIR__ . '/includes/header.php';
     </section>
 </main>
 <?php require __DIR__ . '/includes/footer.php'; ?>
+

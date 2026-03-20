@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-$pageTitle = $pageTitle ?? 'NotShare';
+$pageTitle = $pageTitle ?? 'Not Bul';
 $pageKey = $pageKey ?? 'home';
 $navItems = [
-    ['key' => 'search', 'label' => 'Not Ara', 'href' => 'search.php'],
+    ['key' => 'search', 'label' => 'Ders Notu Bul', 'href' => 'search.php'],
     ['key' => 'upload', 'label' => 'Not Yükle', 'href' => 'upload.php'],
 ];
 ?>
@@ -23,7 +23,7 @@ $navItems = [
         <nav class="navbar navbar-expand-lg navbar-light py-2">
             <a class="navbar-brand brand-mark" href="index.php">
                 <span class="brand-icon" aria-hidden="true"></span>
-                <span>Öğrenci Not Paylaşım</span>
+                <span>Not Bul</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Navigasyonu Aç">
                 <span class="navbar-toggler-icon"></span>
@@ -46,3 +46,4 @@ $navItems = [
         </nav>
     </div>
 </header>
+

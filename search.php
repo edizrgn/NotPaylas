@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
-$pageTitle = 'NotShare | Arama Sonuçları';
+$pageTitle = 'Not Bul | Ders Notu Bul';
 $pageKey = 'search';
 require __DIR__ . '/includes/header.php';
 ?>
 <main class="page-shell">
     <section class="container section-block">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
-            <h1 class="section-title mb-0">Arama Sonuçları</h1>
+            <h1 class="section-title mb-0">Ders Notu Bul</h1>
             <div class="search-box-inline">
                 <input id="searchQuery" class="form-control" type="search" placeholder="Başlık, açıklama veya etiket ara">
             </div>
@@ -73,3 +73,4 @@ require __DIR__ . '/includes/header.php';
     </section>
 </main>
 <?php require __DIR__ . '/includes/footer.php'; ?>
+

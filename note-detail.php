@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-$pageTitle = 'NotShare | Not Detayı';
+$pageTitle = 'Not Bul | Not Detayı';
 $pageKey = 'detail';
 require __DIR__ . '/includes/header.php';
 ?>
@@ -97,3 +97,4 @@ require __DIR__ . '/includes/header.php';
     </section>
 </main>
 <?php require __DIR__ . '/includes/footer.php'; ?>
+

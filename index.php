@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
-$pageTitle = 'NotShare | Anasayfa';
+$pageTitle = 'Not Bul | Anasayfa';
 $pageKey = 'home';
 require __DIR__ . '/includes/header.php';
 ?>
 <main class="page-shell">
     <section class="hero-section container">
         <div class="hero-content">
-            <span class="eyebrow">Türkiye'nin Not Ağı</span>
-            <h1>Ders notunu saniyeler içinde bul, paylaş ve güvenle kullan.</h1>
-            <p>Üniversite, sınıf, ders ve konu bazında filtreleyerek ihtiyacın olan içeriğe hızlıca ulaş.</p>
+            <span class="eyebrow">Not Bul • notbul.site</span>
+            <h1>Ders Notu Bul, paylaş ve öğren.</h1>
+            <p>Not Bul, öğrenciler için Ders Notu Paylaşım Platformu. Üniversite, bölüm, sınıf, ders ve konu filtreleriyle ihtiyacın olan nota hızlıca ulaş.</p>
         </div>
 
         <form id="homeFilterForm" class="glass-panel" data-hierarchy-group data-filter-source="public">
@@ -65,3 +65,4 @@ require __DIR__ . '/includes/header.php';
     </section>
 </main>
 <?php require __DIR__ . '/includes/footer.php'; ?>
+
