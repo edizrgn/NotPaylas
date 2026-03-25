@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+@session_start();
 
 $pageTitle = $pageTitle ?? 'Not Bul';
 $pageKey = $pageKey ?? 'home';
@@ -39,8 +40,13 @@ $navItems = [
                     <?php endforeach; ?>
                 </ul>
                 <div class="d-flex gap-2 auth-actions">
-                    <a class="btn btn-sm btn-outline-primary" href="#">Giriş Yap</a>
-                    <a class="btn btn-sm btn-primary" href="#">Kayıt Ol</a>
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <span class="d-flex align-items-center me-2">Merhaba, <?= htmlspecialchars($_SESSION['first_name']) ?></span>
+                        <a class="btn btn-sm btn-outline-danger" href="logout.php">Çıkış Yap</a>
+                    <?php else: ?>
+                        <a class="btn btn-sm btn-outline-primary" href="login.php">Giriş Yap</a>
+                        <a class="btn btn-sm btn-primary" href="register.php">Kayıt Ol</a>
+                    <?php endif; ?>
                 </div>
             </div>
         </nav>
