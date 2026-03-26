@@ -2,7 +2,10 @@
     <div class="container py-4 py-lg-5">
         <div class="row g-4">
             <div class="col-6 col-lg-3">
-                <h3 class="footer-title">Not Bul</h3>
+                <h3 class="footer-title footer-brand">
+                    <i class="fa-solid fa-book-open-reader brand-icon brand-icon-footer" aria-hidden="true"></i>
+                    <span>Not Bul</span>
+                </h3>
                 <p class="footer-text mb-0">Not Bul, öğrenciler için ders notu paylaşım platformudur.</p>
             </div>
             <div class="col-6 col-lg-3">
@@ -44,4 +47,3 @@
 <script src="assets/js/app.js"></script>
 </body>
 </html>
-
