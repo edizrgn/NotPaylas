@@ -9,23 +9,25 @@ require_once __DIR__ . '/includes/db.php';
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if ($id <= 0) {
-    header('Location: index.php');
+    echo "HATA: Geçersiz ID ($id)"; 
     exit;
 }
 
-$stmt = $pdo->prepare("
-    SELECT n.*, u.first_name, u.last_name 
-    FROM notes n
-    JOIN users u ON n.user_id = u.id
-    WHERE n.id = :id
-");
-$stmt->execute(['id' => $id]);
-$note = $stmt->fetch();
+try {
+    $stmt = $pdo->prepare("
+        SELECT n.*, u.first_name, u.last_name 
+        FROM notes n
+        JOIN users u ON n.user_id = u.id
+        WHERE n.id = :id
+    ");
+    $stmt->execute(['id' => $id]);
+    $note = $stmt->fetch();
+} catch (Exception $e) {
+    die("Sorgu Hatası: " . $e->getMessage());
+}
 
 if (!$note) {
-    // Debug: die("Not bulunamadı. Aranan ID: " . $id); 
-    header('Location: index.php?error=not_found&id=' . $id);
-    exit;
+    die("Veritabanında bu ID ile bir not bulunamadı (ID: $id). Lütfen notun veritabanına kaydedildiğinden ve bir kullanıcıya ait olduğundan emin olun.");
 }
 
 $pageTitle = 'Not Bul | ' . htmlspecialchars($note['title']);
@@ -45,13 +47,16 @@ require __DIR__ . '/includes/header.php';
                         <span class="badge text-bg-info"><?= strtoupper(pathinfo($note['original_filename'], PATHINFO_EXTENSION)) ?> Önizleme</span>
                     </div>
                     <div class="preview-canvas p-0" style="min-height: 500px; background: #f8f9fa;">
-                        <?php if (strpos($note['mime_type'], 'pdf') !== false): ?>
+                        <?php 
+                        $mime = $note['mime_type'];
+                        if (strpos($mime, 'pdf') !== false): 
+                        ?>
                             <iframe src="view.php?id=<?= $note['id'] ?>#toolbar=0" width="100%" height="600px" style="border: none;"></iframe>
-                        <?php elseif (strpos($note['mime_type'], 'image/') === 0): ?>
+                        <?php elseif (strpos($mime, 'image/') === 0): ?>
                             <img src="view.php?id=<?= $note['id'] ?>" class="img-fluid" alt="<?= htmlspecialchars($note['title']) ?>">
                         <?php else: ?>
                             <div class="p-4 text-center">
-                                <p class="mb-2 fw-semibold">Bu dosya formatı (<?= htmlspecialchars($note['mime_type']) ?>) için tarayıcıda doğrudan önizleme desteklenmiyor.</p>
+                                <p class="mb-2 fw-semibold">Bu dosya formatı (<?= htmlspecialchars($mime) ?>) için tarayıcıda doğrudan önizleme desteklenmiyor.</p>
                                 <p class="mb-0 text-secondary">Aşağıdaki butonu kullanarak dosyayı indirebilirsiniz.</p>
                             </div>
                         <?php endif; ?>
@@ -75,9 +80,11 @@ require __DIR__ . '/includes/header.php';
 
                     <div class="mt-3 d-flex flex-wrap gap-2">
                         <?php 
-                        $tags = explode(',', $note['tags']);
+                        $tagStr = (string)$note['tags'];
+                        $tags = explode(',', $tagStr);
                         foreach ($tags as $tag): 
-                            if ($tag = trim($tag)):
+                            $tag = trim($tag);
+                            if ($tag !== ''):
                         ?>
                             <span class="badge rounded-pill text-bg-light">#<?= htmlspecialchars($tag) ?></span>
                         <?php 
@@ -92,22 +99,6 @@ require __DIR__ . '/includes/header.php';
                     </div>
                 </article>
             </div>
-        </div>
-    </section>
-
-    <!-- Statik yorumlar korunuyor -->
-    <section class="container section-block pb-5">
-        <div class="panel-card">
-            <h2 class="section-title mb-3">Yorumlar</h2>
-            <div id="commentsList" class="comment-list">
-                <article class="comment-item">
-                    <header>
-                        <strong>Zeynep</strong> <span class="text-secondary">| 5/5</span>
-                    </header>
-                    <p class="mb-0">Özellikle final öncesi çok faydalı oldu. Teşekkürler.</p>
-                </article>
-            </div>
-            <!-- ... geri kalan statik yorumlar ve form ... -->
         </div>
     </section>
 </main>
