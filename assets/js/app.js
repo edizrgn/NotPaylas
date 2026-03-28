@@ -1160,7 +1160,7 @@
 
         const page = document.body.dataset.page;
         if (page === 'home') {
-            initHomePage();
+            // initHomePage(); // Devredışı bırakıldı: index.php artık veritabanından gerçek verileri çekiyor.
         }
         if (page === 'upload') {
             initUploadPage();
