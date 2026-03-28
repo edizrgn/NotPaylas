@@ -8,5 +8,5 @@ function getNoteStorageDir(): string
         return rtrim($configuredPath, "/\\") . DIRECTORY_SEPARATOR;
     }
 
-    return __DIR__ . '/../storage/notes/';
+    return '/var/lib/notbul/notes/';
 }

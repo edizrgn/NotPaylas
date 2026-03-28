@@ -14,7 +14,13 @@ if ($id <= 0) {
     die('Geçersiz dosya ID.');
 }
 
-$stmt = $pdo->prepare("SELECT * FROM notes WHERE id = :id");
+$stmt = $pdo->prepare("
+    SELECT *
+    FROM notes
+    WHERE id = :id
+      AND upload_status = 'ready'
+      AND scan_status = 'clean'
+");
 $stmt->execute(['id' => $id]);
 $note = $stmt->fetch();
 
@@ -22,7 +28,18 @@ if (!$note) {
     die('Not bulunamadı.');
 }
 
-$filePath = getNoteStorageDir() . $note['stored_filename'];
+$storagePath = trim((string)($note['storage_path'] ?? ''));
+if ($storagePath === '' && !empty($note['stored_filename'])) {
+    $storagePath = (string)$note['stored_filename'];
+}
+
+$storagePath = str_replace('\\', '/', $storagePath);
+$storagePath = ltrim($storagePath, '/');
+if ($storagePath === '' || strpos($storagePath, '..') !== false) {
+    die('Dosya yolu geçersiz.');
+}
+
+$filePath = rtrim(getNoteStorageDir(), "/\\") . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $storagePath);
 
 if (!file_exists($filePath)) {
     die('Dosya sunucuda bulunamadı.');
@@ -30,6 +47,7 @@ if (!file_exists($filePath)) {
 
 // Tarayıcıya dosya tipini bildir
 header('Content-Type: ' . $note['mime_type']);
+header('X-Content-Type-Options: nosniff');
 header('Content-Length: ' . filesize($filePath));
 
 // Dosyayı oku ve gönder

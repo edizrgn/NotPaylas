@@ -25,6 +25,8 @@ try {
         FROM notes n
         JOIN users u ON n.user_id = u.id
         WHERE n.id = :id
+          AND n.upload_status = 'ready'
+          AND n.scan_status = 'clean'
     ");
     $stmt->execute(['id' => $id]);
     $note = $stmt->fetch();

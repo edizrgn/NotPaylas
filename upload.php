@@ -63,31 +63,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (!in_array($ext, $allowedExtensions) || !in_array($mimeType, $allowedMimeTypes)) {
             $error = 'Desteklenmeyen dosya formatı.';
         } else {
-            $uploadDir = getNoteStorageDir();
-            if (!is_dir($uploadDir)) {
-                if (!mkdir($uploadDir, 0755, true) && !is_dir($uploadDir)) {
-                    $error = 'Dosya saklama klasörü oluşturulamadı.';
-                }
+            $storageRoot = rtrim(getNoteStorageDir(), "/\\") . DIRECTORY_SEPARATOR;
+            $relativeDir = date('Y/m');
+            $targetDir = $storageRoot . str_replace('/', DIRECTORY_SEPARATOR, $relativeDir) . DIRECTORY_SEPARATOR;
+            $sha256 = hash_file('sha256', $tmpName);
 
-                // Apache kullanan ortamlarda klasörü doğrudan erişime kapatır.
-                if (!$error) {
-                    @file_put_contents($uploadDir . '.htaccess', "Deny from all\n");
+            if ($sha256 === false) {
+                $error = 'Dosya bütünlük özeti hesaplanamadı.';
+            }
+
+            if (!$error && !is_dir($storageRoot)) {
+                if (!mkdir($storageRoot, 0750, true) && !is_dir($storageRoot)) {
+                    $error = 'Dosya saklama klasörü oluşturulamadı. Sunucu izinlerini kontrol edin.';
+                } else {
+                    @file_put_contents($storageRoot . '.htaccess', "Deny from all\n");
+                }
+            }
+
+            if (!$error && !is_dir($targetDir)) {
+                if (!mkdir($targetDir, 0750, true) && !is_dir($targetDir)) {
+                    $error = 'Yükleme alt klasörü oluşturulamadı. Sunucu izinlerini kontrol edin.';
                 }
             }
 
             if (!$error) {
-                $storedFilename = md5(uniqid('nb_', true)) . '.' . $ext;
-                $destination = $uploadDir . $storedFilename;
+                try {
+                    $storedFilename = bin2hex(random_bytes(16)) . '.' . $ext;
+                } catch (Throwable $e) {
+                    $storedFilename = md5(uniqid('nb_', true)) . '.' . $ext;
+                }
+                $storagePath = $relativeDir . '/' . $storedFilename;
+                $destination = $targetDir . $storedFilename;
             }
-            
+
             if (!$error && move_uploaded_file($tmpName, $destination)) {
                 $stmt = $pdo->prepare("
                     INSERT INTO notes (
                         user_id, title, description, university_id, department_type, department_id, 
-                        class_id, course, topic, tags, original_filename, stored_filename, file_size, mime_type
+                        class_id, course, topic, tags, original_filename, stored_filename, storage_disk,
+                        storage_path, sha256, file_size, mime_type, upload_status, scan_status
                     ) VALUES (
                         :user_id, :title, :description, :university_id, :department_type, :department_id,
-                        :class_id, :course, :topic, :tags, :original_filename, :stored_filename, :file_size, :mime_type
+                        :class_id, :course, :topic, :tags, :original_filename, :stored_filename, :storage_disk,
+                        :storage_path, :sha256, :file_size, :mime_type, :upload_status, :scan_status
                     )
                 ");
                 
@@ -104,8 +122,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'tags' => $tags,
                     'original_filename' => $originalFilename,
                     'stored_filename' => $storedFilename,
+                    'storage_disk' => 'local',
+                    'storage_path' => $storagePath,
+                    'sha256' => $sha256,
                     'file_size' => $fileSize,
-                    'mime_type' => $mimeType
+                    'mime_type' => $mimeType,
+                    'upload_status' => 'ready',
+                    'scan_status' => 'clean'
                 ]);
                 
                 if ($result) {

@@ -24,9 +24,51 @@ CREATE TABLE IF NOT EXISTS notes (
     topic VARCHAR(150),
     tags VARCHAR(255),
     original_filename VARCHAR(255) NOT NULL,
-    stored_filename VARCHAR(255) NOT NULL,
-    file_size INT NOT NULL,
+    stored_filename VARCHAR(255) NULL,
+    storage_disk VARCHAR(32) NOT NULL DEFAULT 'local',
+    storage_path VARCHAR(255) NOT NULL DEFAULT '',
+    sha256 CHAR(64) NOT NULL DEFAULT '',
+    file_size BIGINT UNSIGNED NOT NULL,
     mime_type VARCHAR(100) NOT NULL,
+    upload_status ENUM('pending', 'ready', 'rejected') NOT NULL DEFAULT 'pending',
+    scan_status ENUM('pending', 'clean', 'infected') NOT NULL DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+-- Existing installations migration.
+ALTER TABLE notes
+    MODIFY COLUMN stored_filename VARCHAR(255) NULL,
+    MODIFY COLUMN file_size BIGINT UNSIGNED NOT NULL,
+    ADD COLUMN IF NOT EXISTS storage_disk VARCHAR(32) NOT NULL DEFAULT 'local' AFTER stored_filename,
+    ADD COLUMN IF NOT EXISTS storage_path VARCHAR(255) NOT NULL DEFAULT '' AFTER storage_disk,
+    ADD COLUMN IF NOT EXISTS sha256 CHAR(64) NOT NULL DEFAULT '' AFTER storage_path,
+    ADD COLUMN IF NOT EXISTS upload_status ENUM('pending', 'ready', 'rejected') NOT NULL DEFAULT 'pending' AFTER mime_type,
+    ADD COLUMN IF NOT EXISTS scan_status ENUM('pending', 'clean', 'infected') NOT NULL DEFAULT 'pending' AFTER upload_status,
+    ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at;
+
+-- Backfill for previous schema rows.
+UPDATE notes
+SET storage_disk = 'local'
+WHERE storage_disk IS NULL OR storage_disk = '';
+
+UPDATE notes
+SET storage_path = stored_filename
+WHERE (storage_path IS NULL OR storage_path = '')
+  AND stored_filename IS NOT NULL
+  AND stored_filename <> '';
+
+UPDATE notes
+SET upload_status = 'ready'
+WHERE upload_status IS NULL OR upload_status = '';
+
+UPDATE notes
+SET scan_status = 'clean'
+WHERE scan_status IS NULL OR scan_status = '';
+
+CREATE INDEX IF NOT EXISTS idx_notes_user_id ON notes(user_id);
+CREATE INDEX IF NOT EXISTS idx_notes_created_at ON notes(created_at);
+CREATE INDEX IF NOT EXISTS idx_notes_status ON notes(upload_status, scan_status);
+CREATE INDEX IF NOT EXISTS idx_notes_course ON notes(course);
+CREATE INDEX IF NOT EXISTS idx_notes_sha256 ON notes(sha256);
