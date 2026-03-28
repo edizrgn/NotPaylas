@@ -1,10 +1,16 @@
 <?php
 declare(strict_types=1);
-error_reporting(E_ALL);
-ini_set('display_errors', '1');
 
-require_once __DIR__ . '/includes/db.php';
 @session_start();
+
+try {
+    require_once __DIR__ . '/includes/db.php';
+} catch (Throwable $e) {
+    error_log('note-detail DB connection error: ' . $e->getMessage());
+    http_response_code(500);
+    echo 'Şu anda veritabanına bağlanılamıyor. Lütfen daha sonra tekrar deneyin.';
+    exit;
+}
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
@@ -22,12 +28,16 @@ try {
     ");
     $stmt->execute(['id' => $id]);
     $note = $stmt->fetch();
-} catch (Exception $e) {
-    die("Sorgu Hatası: " . $e->getMessage());
+} catch (Throwable $e) {
+    error_log('note-detail query error: ' . $e->getMessage());
+    http_response_code(500);
+    echo 'Not bilgisi getirilirken bir sorun oluştu. Lütfen daha sonra tekrar deneyin.';
+    exit;
 }
 
 if (!$note) {
-    die("Veritabanında bu ID ile bir not bulunamadı (ID: $id). Lütfen notun veritabanına kaydedildiğinden ve bir kullanıcıya ait olduğundan emin olun.");
+    header('Location: index.php?error=not_found&id=' . $id);
+    exit;
 }
 
 $pageTitle = 'Not Bul | ' . htmlspecialchars($note['title']);
@@ -103,4 +113,3 @@ require __DIR__ . '/includes/header.php';
     </section>
 </main>
 <?php require __DIR__ . '/includes/footer.php'; ?>
-

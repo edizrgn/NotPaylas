@@ -2,10 +2,11 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/db.php';
+require_once __DIR__ . '/includes/storage.php';
 @session_start();
 
 // Bu dosya PDF ve diğer dokümanları güvenli bir şekilde sunucudan tarayıcıya stream etmek için kullanılır.
-// storage/notes/.htaccess içindeki "Deny from all" kuralını PHP ile aşarız.
+// Dosyalar doğrudan URL ile değil bu endpoint üzerinden sunulur.
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
@@ -21,7 +22,7 @@ if (!$note) {
     die('Not bulunamadı.');
 }
 
-$filePath = __DIR__ . '/storage/notes/' . $note['stored_filename'];
+$filePath = getNoteStorageDir() . $note['stored_filename'];
 
 if (!file_exists($filePath)) {
     die('Dosya sunucuda bulunamadı.');

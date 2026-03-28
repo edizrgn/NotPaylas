@@ -44,152 +44,7 @@
             { id: 'fft', courseId: 'signals', name: 'Fourier ve FFT' },
             { id: 'routing', courseId: 'net', name: 'Routing Protokolleri' }
         ],
-        notes: [
-            {
-                id: 1,
-                title: 'Veri Yapıları Final Özet',
-                description: 'Ağaçlar, hash tablolar ve sınavda çıkmış kritik soruların kısa özetleri.',
-                uploader: 'Ahmet Yılmaz',
-                universityId: '115069',
-                facultyId: 'itu-muh',
-                departmentId: '12010',
-                departmentType: 'lisans',
-                classId: '2',
-                courseId: 'data',
-                topicId: 'trees',
-                tags: ['final', 'ağaç', 'hash'],
-                views: 4982,
-                downloads: 1364,
-                fileType: 'pdf',
-                createdAt: '2026-03-17'
-            },
-            {
-                id: 2,
-                title: 'Database Normalization Cheatsheet',
-                description: '1NF-3NF örnekleri ve tablo ilişki modelleme adımları.',
-                uploader: 'Elif C.',
-                universityId: '126982',
-                facultyId: 'ytu-muh',
-                departmentId: '12010',
-                departmentType: 'lisans',
-                classId: '3',
-                courseId: 'db',
-                topicId: 'normalization',
-                tags: ['sql', 'normalizasyon', 'cheatsheet'],
-                views: 3110,
-                downloads: 980,
-                fileType: 'pdf',
-                createdAt: '2026-03-18'
-            },
-            {
-                id: 3,
-                title: 'Algorithms Midterm Practice',
-                description: 'Greedy, DP ve grafik problemleri için örnek çözüm seti.',
-                uploader: 'Merve D.',
-                universityId: '122571',
-                facultyId: 'metu-eng',
-                departmentId: '12010',
-                departmentType: 'lisans',
-                classId: '2',
-                courseId: 'algo',
-                topicId: 'dp',
-                tags: ['algorithms', 'dp', 'midterm'],
-                views: 4410,
-                downloads: 1290,
-                fileType: 'pdf',
-                createdAt: '2026-03-16'
-            },
-            {
-                id: 4,
-                title: 'Programlamaya Giriş OOP Notları',
-                description: 'Sınıf, nesne, kapsülleme ve kalıtım anlatım notları.',
-                uploader: 'Sena K.',
-                universityId: '115069',
-                facultyId: 'itu-muh',
-                departmentId: '12010',
-                departmentType: 'lisans',
-                classId: '1',
-                courseId: 'prog',
-                topicId: 'oop',
-                tags: ['oop', 'php', 'başlangıç'],
-                views: 2800,
-                downloads: 760,
-                fileType: 'docx',
-                createdAt: '2026-03-13'
-            },
-            {
-                id: 5,
-                title: 'FFT Çıkış Soruları',
-                description: 'Sayısal İşaret İşleme dersinden çıkmış final soruları ve çözüm akışları.',
-                uploader: 'Burak T.',
-                universityId: '115069',
-                facultyId: 'itu-muh',
-                departmentId: '12644',
-                departmentType: 'lisans',
-                classId: '3',
-                courseId: 'signals',
-                topicId: 'fft',
-                tags: ['fft', 'sinyal', 'çıkmış-soru'],
-                views: 2200,
-                downloads: 640,
-                fileType: 'pptx',
-                createdAt: '2026-03-11'
-            },
-            {
-                id: 6,
-                title: 'Bilgisayar Ağları Routing Özet',
-                description: 'OSPF, BGP ve paket yönlendirme mantığını tek dokümanda toplayan not.',
-                uploader: 'Kaan U.',
-                universityId: '126982',
-                facultyId: 'ytu-muh',
-                departmentId: '12010',
-                departmentType: 'lisans',
-                classId: '4',
-                courseId: 'net',
-                topicId: 'routing',
-                tags: ['routing', 'network', 'final'],
-                views: 3870,
-                downloads: 1115,
-                fileType: 'pdf',
-                createdAt: '2026-03-19'
-            },
-            {
-                id: 7,
-                title: 'Calculus Limit Formülleri',
-                description: 'Limit, süreklilik ve türev geçişleri için hızlı tekrar kartları.',
-                uploader: 'Irmak S.',
-                universityId: '126982',
-                facultyId: 'ytu-muh',
-                departmentId: '14051',
-                departmentType: 'lisans',
-                classId: '1',
-                courseId: 'calc',
-                topicId: 'limits',
-                tags: ['limit', 'türev', 'vize'],
-                views: 2080,
-                downloads: 530,
-                fileType: 'image',
-                createdAt: '2026-03-15'
-            },
-            {
-                id: 8,
-                title: 'Veri Yapıları Çıkış Soru Arşivi',
-                description: 'Son 5 yıl final soruları ve kısa cevap anahtarları.',
-                uploader: 'Nisa P.',
-                universityId: '115069',
-                facultyId: 'itu-muh',
-                departmentId: '12010',
-                departmentType: 'lisans',
-                classId: '2',
-                courseId: 'data',
-                topicId: 'trees',
-                tags: ['çıkmış-soru', 'final', 'veri-yapıları'],
-                views: 3560,
-                downloads: 1212,
-                fileType: 'pdf',
-                createdAt: '2026-03-12'
-            }
-        ]
+        notes: []
     };
 
     const REMOTE = {
@@ -201,8 +56,6 @@
         },
         departmentsById: new Map()
     };
-
-    const STORED_NOTES_KEY = 'notbul.uploaded_notes.v1';
 
     const LOOKUP = {
         facultyById: new Map(DATA.faculties.map((item) => [item.id, item])),
@@ -316,28 +169,11 @@
         return resolveLabel(DATA.topics, note.topicId);
     }
 
-    function readStoredNotes() {
-        try {
-            const raw = localStorage.getItem(STORED_NOTES_KEY);
-            if (!raw) {
-                return [];
-            }
-            const parsed = JSON.parse(raw);
-            if (!Array.isArray(parsed)) {
-                return [];
-            }
-            return parsed;
-        } catch (error) {
-            return [];
-        }
-    }
-
-    function writeStoredNotes(notes) {
-        localStorage.setItem(STORED_NOTES_KEY, JSON.stringify(notes));
-    }
-
     function getAllNotes() {
-        return [...DATA.notes, ...readStoredNotes()];
+        if (Array.isArray(window.NOTBUL_NOTES)) {
+            return window.NOTBUL_NOTES;
+        }
+        return DATA.notes;
     }
 
     function getUniqueOptions(values) {
@@ -631,11 +467,6 @@
             group.dispatchEvent(new Event('hierarchy:changed'));
         });
 
-        window.addEventListener('notbul:notes-updated', () => {
-            refreshCourse();
-            refreshTopic();
-            group.dispatchEvent(new Event('hierarchy:changed'));
-        });
     }
 
     function collectFilters(form) {
@@ -850,14 +681,6 @@
 
         const maxBytes = 25 * 1024 * 1024;
         const acceptedExtensions = new Set(['pdf', 'docx', 'pptx', 'png', 'jpg', 'jpeg', 'webp']);
-        const detectFileType = (fileName) => {
-            const extension = normalize(fileName.split('.').pop());
-            if (extension === 'pdf' || extension === 'docx' || extension === 'pptx') {
-                return extension;
-            }
-            return 'image';
-        };
-
         const showNotice = (message, type) => {
             if (!notice) {
                 return;
@@ -958,10 +781,9 @@
         });
 
         uploadForm.addEventListener('submit', (event) => {
-            event.preventDefault();
-
             const selectedFile = fileInput?.files?.[0];
             if (!selectedFile) {
+                event.preventDefault();
                 showNotice('Lütfen önce bir dosya seç.', 'danger');
                 return;
             }
@@ -969,47 +791,10 @@
             const formData = new FormData(uploadForm);
             const courseValue = (formData.get('course') || '').toString().trim();
             if (!courseValue) {
+                event.preventDefault();
                 showNotice('Ders alanı zorunludur. Lütfen ders bilgisini gir.', 'danger');
                 return;
             }
-
-            const tagsRaw = (formData.get('tags') || '').toString();
-            const tags = tagsRaw
-                .split(',')
-                .map((item) => item.trim())
-                .filter(Boolean);
-
-            const newNote = {
-                id: Date.now(),
-                title: (formData.get('title') || '').toString().trim() || 'İsimsiz Not',
-                description: (formData.get('description') || '').toString().trim(),
-                uploader: 'Yeni Kullanıcı',
-                universityId: (formData.get('university_id') || '').toString(),
-                departmentType: (formData.get('department_type') || '').toString(),
-                departmentId: (formData.get('department_id') || '').toString(),
-                classId: (formData.get('class_id') || '').toString(),
-                course: courseValue,
-                topic: (formData.get('topic') || '').toString().trim(),
-                tags,
-                views: 0,
-                downloads: 0,
-                fileType: detectFileType(selectedFile.name),
-                createdAt: new Date().toISOString().slice(0, 10)
-            };
-
-            const storedNotes = readStoredNotes();
-            storedNotes.unshift(newNote);
-            writeStoredNotes(storedNotes);
-            window.dispatchEvent(new Event('notbul:notes-updated'));
-
-            showNotice('Not başarıyla kaydedildi. Ders ve konu seçenekleri güncellendi.', 'success');
-            uploadForm.reset();
-            if (fileList) {
-                fileList.innerHTML = '';
-            }
-            uploadForm.querySelectorAll('[data-tag-input]').forEach((element) => {
-                element.dispatchEvent(new Event('tag:clear'));
-            });
         });
     }
     function initNoteDetailPage() {
@@ -1178,4 +963,3 @@
         }
     });
 })();
-

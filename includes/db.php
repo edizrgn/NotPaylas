@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 $host = '127.0.0.1';
 $db   = 'notbul';
-$user = 'root';
+$user = 'notbul_user';
 $pass = '';
 $charset = 'utf8mb4';
 

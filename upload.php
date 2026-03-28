@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/db.php';
+require_once __DIR__ . '/includes/storage.php';
 @session_start();
 
 if (!isset($_SESSION['user_id'])) {
@@ -62,16 +63,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (!in_array($ext, $allowedExtensions) || !in_array($mimeType, $allowedMimeTypes)) {
             $error = 'Desteklenmeyen dosya formatı.';
         } else {
-            $uploadDir = __DIR__ . '/storage/notes/';
+            $uploadDir = getNoteStorageDir();
             if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
-                file_put_contents($uploadDir . '.htaccess', "Deny from all\n");
+                if (!mkdir($uploadDir, 0755, true) && !is_dir($uploadDir)) {
+                    $error = 'Dosya saklama klasörü oluşturulamadı.';
+                }
+
+                // Apache kullanan ortamlarda klasörü doğrudan erişime kapatır.
+                if (!$error) {
+                    @file_put_contents($uploadDir . '.htaccess', "Deny from all\n");
+                }
+            }
+
+            if (!$error) {
+                $storedFilename = md5(uniqid('nb_', true)) . '.' . $ext;
+                $destination = $uploadDir . $storedFilename;
             }
             
-            $storedFilename = md5(uniqid('nb_', true)) . '.' . $ext;
-            $destination = $uploadDir . $storedFilename;
-            
-            if (move_uploaded_file($tmpName, $destination)) {
+            if (!$error && move_uploaded_file($tmpName, $destination)) {
                 $stmt = $pdo->prepare("
                     INSERT INTO notes (
                         user_id, title, description, university_id, department_type, department_id, 
@@ -107,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         unlink($destination); // sil
                     }
                 }
-            } else {
+            } elseif (!$error) {
                 $error = 'Dosya sunucuya taşınırken bir hata oluştu.';
             }
         }
@@ -128,7 +137,7 @@ require __DIR__ . '/includes/header.php';
                             <h1 class="section-title mb-1">Not Yükleme</h1>
                             <p class="mb-0 text-secondary">Not Bul üzerinde ders notunu güvenli şekilde yükle, hiyerarşiyi seç ve doğru öğrenci kitlesine ulaştır.</p>
                         </div>
-                        <span class="badge bg-soft-info text-primary-emphasis">Frontend prototipi</span>
+                        <span class="badge bg-soft-info text-primary-emphasis">Backend aktif</span>
                     </div>
 
                     <form id="uploadForm" class="mt-4" data-hierarchy-group data-filter-source="public" method="POST" enctype="multipart/form-data">
@@ -211,7 +220,7 @@ require __DIR__ . '/includes/header.php';
                         <li>MIME-type ve dosya uzantısı backend tarafında yeniden doğrulanacak.</li>
                         <li>Maksimum dosya boyutu limitini aşan yüklemeler reddedilecek.</li>
                         <li>Gerçek dosya adı yerine benzersiz hash tabanlı adlandırma kullanılacak.</li>
-                        <li>Dosyalar web root dışında saklanıp PHP ile stream edilecek.</li>
+                        <li>Dosyalar doğrudan URL ile değil, PHP üzerinden güvenli stream edilir.</li>
                         <li>Tüm metin verileri çıkışta `htmlspecialchars` ile filtrelenecek.</li>
                     </ul>
                 </aside>
@@ -220,4 +229,3 @@ require __DIR__ . '/includes/header.php';
     </section>
 </main>
 <?php require __DIR__ . '/includes/footer.php'; ?>
-
