@@ -679,7 +679,9 @@
         const notice = document.getElementById('uploadNotice');
         const pickFileButton = document.getElementById('pickFileButton');
 
-        const maxBytes = 25 * 1024 * 1024;
+        const configuredMaxMb = Number.parseInt(uploadForm.dataset.maxUploadMb || '25', 10);
+        const maxUploadMb = Number.isFinite(configuredMaxMb) && configuredMaxMb > 0 ? configuredMaxMb : 25;
+        const maxBytes = maxUploadMb * 1024 * 1024;
         const acceptedExtensions = new Set(['pdf', 'docx', 'pptx', 'png', 'jpg', 'jpeg', 'webp']);
         const showNotice = (message, type) => {
             if (!notice) {
@@ -719,7 +721,7 @@
             }
 
             if (file.size > maxBytes) {
-                errors.push('Dosya 25 MB limitini aşıyor.');
+                errors.push(`Dosya ${maxUploadMb} MB limitini aşıyor.`);
             }
 
             return errors;

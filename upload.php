@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/storage.php';
+require_once __DIR__ . '/includes/upload_config.php';
 @session_start();
 
 if (!isset($_SESSION['user_id'])) {
@@ -12,6 +13,8 @@ if (!isset($_SESSION['user_id'])) {
 
 $error = '';
 $success = '';
+$maxUploadMb = getMaxUploadMb();
+$maxUploadBytes = getMaxUploadBytes();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $userId = $_SESSION['user_id'];
@@ -37,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Geçerli bir dosya seçilmedi veya yükleme hatası oluştu.';
     } else {
         $file = $_FILES['note_file'];
-        $maxSize = 25 * 1024 * 1024; // 25 MB
+        $maxSize = $maxUploadBytes;
         
         $allowedMimeTypes = [
             'application/pdf',
@@ -59,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         finfo_close($finfo);
         
         if ($fileSize > $maxSize) {
-            $error = 'Dosya boyutu 25 MB sınırını aşıyor.';
+            $error = 'Dosya boyutu ' . $maxUploadMb . ' MB sınırını aşıyor.';
         } elseif (!in_array($ext, $allowedExtensions) || !in_array($mimeType, $allowedMimeTypes)) {
             $error = 'Desteklenmeyen dosya formatı.';
         } else {
@@ -163,11 +166,11 @@ require __DIR__ . '/includes/header.php';
                         <span class="badge bg-soft-info text-primary-emphasis">Backend aktif</span>
                     </div>
 
-                    <form id="uploadForm" class="mt-4" data-hierarchy-group data-filter-source="public" method="POST" enctype="multipart/form-data">
+                    <form id="uploadForm" class="mt-4" data-hierarchy-group data-filter-source="public" data-max-upload-mb="<?= (int)$maxUploadMb ?>" method="POST" enctype="multipart/form-data">
                         <div id="dropZone" class="drop-zone">
                             <input id="noteFile" name="note_file" type="file" accept=".pdf,.docx,.pptx,.png,.jpg,.jpeg,.webp" hidden>
                             <p class="drop-title mb-2">Dosyayı sürükle bırak veya seç</p>
-                            <p class="mb-3 text-secondary">Desteklenen türler: PDF, DOCX, PPTX, PNG, JPG, WEBP | Maksimum 25 MB</p>
+                            <p class="mb-3 text-secondary">Desteklenen türler: PDF, DOCX, PPTX, PNG, JPG, WEBP | Maksimum <?= (int)$maxUploadMb ?> MB</p>
                             <button class="btn btn-primary" type="button" id="pickFileButton">Dosya Seç</button>
                             <div id="fileList" class="file-list mt-3"></div>
                         </div>
