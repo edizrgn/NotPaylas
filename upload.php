@@ -16,6 +16,19 @@ $success = '';
 $maxUploadMb = getMaxUploadMb();
 $maxUploadBytes = getMaxUploadBytes();
 
+$uploadErrorMessage = static function (int $errorCode, int $maxMb): string {
+    return match ($errorCode) {
+        UPLOAD_ERR_OK => '',
+        UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => "Dosya boyutu {$maxMb} MB sınırını aşıyor.",
+        UPLOAD_ERR_PARTIAL => 'Dosya yüklemesi tamamlanamadı. Lütfen tekrar deneyin.',
+        UPLOAD_ERR_NO_FILE => 'Lütfen bir dosya seçin.',
+        UPLOAD_ERR_NO_TMP_DIR => 'Sunucuda geçici yükleme klasörü bulunamadı.',
+        UPLOAD_ERR_CANT_WRITE => 'Dosya sunucuya yazılamadı. Lütfen daha sonra tekrar deneyin.',
+        UPLOAD_ERR_EXTENSION => 'Yükleme güvenlik nedeniyle engellendi.',
+        default => 'Dosya yüklenirken beklenmeyen bir hata oluştu.'
+    };
+};
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $userId = $_SESSION['user_id'];
     $title = trim($_POST['title'] ?? '');
@@ -36,10 +49,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if (empty($title) || empty($course)) {
         $error = 'Başlık ve Ders alanları zorunludur.';
-    } elseif (!isset($_FILES['note_file']) || $_FILES['note_file']['error'] !== UPLOAD_ERR_OK) {
-        $error = 'Geçerli bir dosya seçilmedi veya yükleme hatası oluştu.';
+    } elseif (!isset($_FILES['note_file'])) {
+        $error = 'Dosya bilgisi alınamadı. Lütfen dosyayı tekrar seçin.';
     } else {
         $file = $_FILES['note_file'];
+        $uploadErrorCode = (int)($file['error'] ?? UPLOAD_ERR_NO_FILE);
+        if ($uploadErrorCode !== UPLOAD_ERR_OK) {
+            $error = $uploadErrorMessage($uploadErrorCode, $maxUploadMb);
+        }
+
         $maxSize = $maxUploadBytes;
         
         $allowedMimeTypes = [
@@ -52,14 +70,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
         $allowedExtensions = ['pdf', 'docx', 'pptx', 'png', 'jpg', 'jpeg', 'webp'];
         
-        $originalFilename = $file['name'];
-        $fileSize = $file['size'];
-        $tmpName = $file['tmp_name'];
+        $originalFilename = (string)($file['name'] ?? '');
+        $fileSize = (int)($file['size'] ?? 0);
+        $tmpName = (string)($file['tmp_name'] ?? '');
         
+        if (!$error && !is_uploaded_file($tmpName)) {
+            $error = 'Yüklenen dosya doğrulanamadı. Lütfen tekrar deneyin.';
+        }
+
         $ext = strtolower(pathinfo($originalFilename, PATHINFO_EXTENSION));
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType = finfo_file($finfo, $tmpName);
-        finfo_close($finfo);
+        $mimeType = '';
+        if (!$error) {
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mimeType = (string)finfo_file($finfo, $tmpName);
+            finfo_close($finfo);
+        }
         
         if ($fileSize > $maxSize) {
             $error = 'Dosya boyutu ' . $maxUploadMb . ' MB sınırını aşıyor.';
@@ -161,7 +186,7 @@ require __DIR__ . '/includes/header.php';
                     <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
                         <div>
                             <h1 class="section-title mb-1">Not Yükleme</h1>
-                            <p class="mb-0 text-secondary">Not Bul üzerinde ders notunu güvenli şekilde yükle, hiyerarşiyi seç ve doğru öğrenci kitlesine ulaştır.</p>
+                            <p class="mb-0 text-secondary">Ders notunu güvenli şekilde yükle, gerekli alanları doldur ve paylaş.</p>
                         </div>
                         <span class="badge bg-soft-info text-primary-emphasis">Backend aktif</span>
                     </div>
@@ -169,8 +194,8 @@ require __DIR__ . '/includes/header.php';
                     <form id="uploadForm" class="mt-4" data-hierarchy-group data-filter-source="public" data-max-upload-mb="<?= (int)$maxUploadMb ?>" method="POST" enctype="multipart/form-data">
                         <div id="dropZone" class="drop-zone">
                             <input id="noteFile" name="note_file" type="file" accept=".pdf,.docx,.pptx,.png,.jpg,.jpeg,.webp" hidden>
-                            <p class="drop-title mb-2">Dosyayı sürükle bırak veya seç</p>
-                            <p class="mb-3 text-secondary">Desteklenen türler: PDF, DOCX, PPTX, PNG, JPG, WEBP | Maksimum <?= (int)$maxUploadMb ?> MB</p>
+                            <p class="drop-title mb-2">Dosyanı buraya bırak veya cihazından seç</p>
+                            <p class="mb-3 text-secondary">Desteklenen türler: PDF, DOCX, PPTX, PNG, JPG, WEBP • En fazla <?= (int)$maxUploadMb ?> MB</p>
                             <button class="btn btn-primary" type="button" id="pickFileButton">Dosya Seç</button>
                             <div id="fileList" class="file-list mt-3"></div>
                         </div>
@@ -241,13 +266,13 @@ require __DIR__ . '/includes/header.php';
 
             <div class="col-lg-4">
                 <aside class="panel-card sticky-panel">
-                    <h2 class="h5">Güvenlik Kontrol Listesi</h2>
+                    <h2 class="h5">Yükleme Bilgilendirmesi</h2>
                     <ul class="security-list mb-0">
-                        <li>MIME-type ve dosya uzantısı backend tarafında yeniden doğrulanacak.</li>
-                        <li>Maksimum dosya boyutu limitini aşan yüklemeler reddedilecek.</li>
-                        <li>Gerçek dosya adı yerine benzersiz hash tabanlı adlandırma kullanılacak.</li>
-                        <li>Dosyalar doğrudan URL ile değil, PHP üzerinden güvenli stream edilir.</li>
-                        <li>Tüm metin verileri çıkışta `htmlspecialchars` ile filtrelenecek.</li>
+                        <li>Dosya türü ve uzantı sunucuda yeniden kontrol edilir.</li>
+                        <li><?= (int)$maxUploadMb ?> MB üstündeki dosyalar kabul edilmez.</li>
+                        <li>Dosyalar güvenli bir isimle saklanır.</li>
+                        <li>Dosyalar doğrudan bağlantıyla değil, güvenli görüntüleme/indirme ile sunulur.</li>
+                        <li>Girilen metinler güvenli filtrelerden geçirilir.</li>
                     </ul>
                 </aside>
             </div>

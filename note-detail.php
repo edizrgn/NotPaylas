@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 try {
     require_once __DIR__ . '/includes/db.php';
+    require_once __DIR__ . '/includes/storage.php';
 } catch (Throwable $e) {
     error_log('note-detail DB connection error: ' . $e->getMessage());
     http_response_code(500);
@@ -17,6 +18,67 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($id <= 0) {
     echo "HATA: Geçersiz ID ($id)"; 
     exit;
+}
+
+$deleteError = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_note') {
+    $currentUserId = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
+    $requestToken = (string)($_POST['csrf_token'] ?? '');
+    $sessionToken = (string)($_SESSION['csrf_token_note_delete'] ?? '');
+
+    if ($currentUserId <= 0) {
+        $deleteError = 'Not silmek için önce giriş yapmalısınız.';
+    } elseif ($sessionToken === '' || !hash_equals($sessionToken, $requestToken)) {
+        $deleteError = 'Güvenlik doğrulaması başarısız oldu. Sayfayı yenileyip tekrar deneyin.';
+    } else {
+        try {
+            $ownerStmt = $pdo->prepare("SELECT id, user_id, storage_path, stored_filename FROM notes WHERE id = :id");
+            $ownerStmt->execute(['id' => $id]);
+            $noteToDelete = $ownerStmt->fetch();
+
+            if (!$noteToDelete) {
+                header('Location: index.php?error=not_found&id=' . $id);
+                exit;
+            }
+
+            if ((int)$noteToDelete['user_id'] !== $currentUserId) {
+                $deleteError = 'Sadece kendi yüklediğiniz notları silebilirsiniz.';
+            } else {
+                $pdo->beginTransaction();
+
+                $deleteStmt = $pdo->prepare("DELETE FROM notes WHERE id = :id AND user_id = :user_id LIMIT 1");
+                $deleteStmt->execute([
+                    'id' => $id,
+                    'user_id' => $currentUserId
+                ]);
+
+                if ($deleteStmt->rowCount() < 1) {
+                    $pdo->rollBack();
+                    $deleteError = 'Not silinirken bir sorun oluştu. Lütfen tekrar deneyin.';
+                } else {
+                    $pdo->commit();
+
+                    $storagePath = resolveNoteStoragePath($noteToDelete);
+                    if ($storagePath !== null) {
+                        $absolutePath = buildNoteAbsolutePath($storagePath);
+                        if (is_file($absolutePath)) {
+                            @unlink($absolutePath);
+                        }
+                    }
+
+                    header('Location: index.php?note_deleted=1');
+                    exit;
+                }
+            }
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log('note-detail delete error: ' . $e->getMessage());
+            $deleteError = 'Not silinirken beklenmeyen bir hata oluştu.';
+        }
+    }
 }
 
 try {
@@ -42,12 +104,27 @@ if (!$note) {
     exit;
 }
 
+$deleteToken = (string)($_SESSION['csrf_token_note_delete'] ?? '');
+if ($deleteToken === '') {
+    try {
+        $deleteToken = bin2hex(random_bytes(32));
+    } catch (Throwable $e) {
+        $deleteToken = hash('sha256', session_id() . (string)microtime(true));
+    }
+    $_SESSION['csrf_token_note_delete'] = $deleteToken;
+}
+
+$isOwner = isset($_SESSION['user_id']) && (int)$_SESSION['user_id'] === (int)$note['user_id'];
+
 $pageTitle = 'Not Bul | ' . htmlspecialchars($note['title']);
 $pageKey = 'detail';
 require __DIR__ . '/includes/header.php';
 ?>
 <main class="page-shell">
     <section class="container section-block">
+        <?php if ($deleteError): ?>
+            <div class="alert alert-danger"><?= htmlspecialchars($deleteError) ?></div>
+        <?php endif; ?>
         <p class="text-secondary small mb-3">
             Anasayfa > <?= htmlspecialchars($note['course']) ?> > <?= htmlspecialchars($note['title']) ?>
         </p>
@@ -109,6 +186,19 @@ require __DIR__ . '/includes/header.php';
                         <a class="btn btn-primary btn-lg px-4" href="view.php?id=<?= $note['id'] ?>" download="<?= htmlspecialchars($note['original_filename']) ?>">İndir</a>
                         <a class="btn btn-outline-primary btn-lg" href="search.php">Benzer Notlar</a>
                     </div>
+                    <?php if ($isOwner): ?>
+                        <form method="POST" action="note-detail.php?id=<?= (int)$note['id'] ?>" class="mt-3">
+                            <input type="hidden" name="action" value="delete_note">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($deleteToken, ENT_QUOTES, 'UTF-8') ?>">
+                            <button
+                                type="submit"
+                                class="btn btn-outline-danger"
+                                onclick="return confirm('Bu notu kalıcı olarak silmek istediğinize emin misiniz?');"
+                            >
+                                Notu Sil
+                            </button>
+                        </form>
+                    <?php endif; ?>
                 </article>
             </div>
         </div>

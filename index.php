@@ -25,9 +25,15 @@ $pageKey = 'home';
 require __DIR__ . '/includes/header.php';
 
 $errorMsg = isset($_GET['error']) && $_GET['error'] === 'not_found' ? 'Üzgünüz, aradığınız not veritabanında bulunamadı (ID: ' . (int)$_GET['id'] . ').' : '';
+$successMsg = isset($_GET['note_deleted']) && $_GET['note_deleted'] === '1'
+    ? 'Not başarıyla silindi.'
+    : '';
 ?>
 <main class="page-shell">
     <section class="hero-section container">
+        <?php if ($successMsg): ?>
+            <div class="alert alert-success mt-3"><?= htmlspecialchars($successMsg) ?></div>
+        <?php endif; ?>
         <?php if ($errorMsg): ?>
             <div class="alert alert-warning mt-3"><?= htmlspecialchars($errorMsg) ?></div>
         <?php endif; ?>

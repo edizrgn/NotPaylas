@@ -745,7 +745,7 @@
             }
 
             renderSelectedFile(file);
-            showNotice('Dosya istemci tarafında doğrulandı. Son kontrol backend tarafında yapılacak.', 'success');
+            showNotice('Dosya seçildi. Yüklemek için "Dosyayı Yükle" butonuna tıklayın.', 'success');
         };
 
         const preventDefaults = (event) => {
@@ -786,7 +786,7 @@
             const selectedFile = fileInput?.files?.[0];
             if (!selectedFile) {
                 event.preventDefault();
-                showNotice('Lütfen önce bir dosya seç.', 'danger');
+                showNotice('Lütfen önce bir dosya seçin.', 'danger');
                 return;
             }
 
@@ -794,7 +794,7 @@
             const courseValue = (formData.get('course') || '').toString().trim();
             if (!courseValue) {
                 event.preventDefault();
-                showNotice('Ders alanı zorunludur. Lütfen ders bilgisini gir.', 'danger');
+                showNotice('Ders alanı zorunlu. Lütfen ders bilgisini girin.', 'danger');
                 return;
             }
         });
