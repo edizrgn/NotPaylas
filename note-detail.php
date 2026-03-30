@@ -3,6 +3,49 @@ declare(strict_types=1);
 
 @session_start();
 
+function resolveDepartmentName(string $departmentId): string
+{
+    $normalizedId = trim($departmentId);
+    if ($normalizedId === '') {
+        return '-';
+    }
+
+    static $departmentsById = null;
+
+    if ($departmentsById === null) {
+        $departmentsById = [];
+        $dataPath = __DIR__ . '/assets/data/bolumler.json';
+
+        $json = @file_get_contents($dataPath);
+        if (is_string($json) && $json !== '') {
+            $decoded = json_decode($json, true);
+            if (is_array($decoded)) {
+                foreach (['lisans', 'onlisans'] as $type) {
+                    $departments = $decoded[$type] ?? [];
+                    if (!is_array($departments)) {
+                        continue;
+                    }
+
+                    foreach ($departments as $department) {
+                        if (!is_array($department)) {
+                            continue;
+                        }
+
+                        $id = trim((string)($department['id'] ?? ''));
+                        $name = trim((string)($department['name'] ?? ''));
+
+                        if ($id !== '' && $name !== '') {
+                            $departmentsById[$id] = $name;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return $departmentsById[$normalizedId] ?? $normalizedId;
+}
+
 try {
     require_once __DIR__ . '/includes/db.php';
     require_once __DIR__ . '/includes/storage.php';
@@ -115,6 +158,7 @@ if ($deleteToken === '') {
 }
 
 $isOwner = isset($_SESSION['user_id']) && (int)$_SESSION['user_id'] === (int)$note['user_id'];
+$departmentName = resolveDepartmentName((string)($note['department_id'] ?? ''));
 
 $pageTitle = 'Not Bul | ' . htmlspecialchars($note['title']);
 $pageKey = 'detail';
@@ -161,7 +205,7 @@ require __DIR__ . '/includes/header.php';
                     <div class="note-meta-grid">
                         <div><span>Yükleyen</span><strong><?= htmlspecialchars($note['first_name'] . ' ' . $note['last_name']) ?></strong></div>
                         <div><span>Ders</span><strong><?= htmlspecialchars($note['course']) ?></strong></div>
-                        <div><span>Bölüm</span><strong><?= htmlspecialchars($note['department_id'] ?: '-') ?></strong></div>
+                        <div><span>Bölüm</span><strong><?= htmlspecialchars($departmentName) ?></strong></div>
                         <div><span>Sınıf</span><strong><?= htmlspecialchars($note['class_id'] ?: '-') ?></strong></div>
                         <div><span>Tarih</span><strong><?= date('d.m.Y', strtotime($note['created_at'])) ?></strong></div>
                         <div><span>Boyut</span><strong><?= round($note['file_size'] / 1024, 2) ?> KB</strong></div>
