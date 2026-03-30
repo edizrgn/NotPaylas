@@ -4,7 +4,7 @@ declare(strict_types=1);
 $host = '127.0.0.1';
 $db   = 'notbul';
 $user = 'notbul_user';
-$pass = '';
+$pass = 'X2558w';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
