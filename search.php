@@ -117,7 +117,7 @@ require __DIR__ . '/includes/header.php';
                         <label class="form-label" for="searchFileType">Dosya Türü</label>
                         <select class="form-select" id="searchFileType" name="file_type">
                             <option value="">Tüm dosya türleri</option>
-                            <option value="pdf">Pdf</option>
+                            <option value="pdf">PDF</option>
                             <option value="docx">DOCX</option>
                             <option value="pptx">PPTX</option>
                             <option value="image">Görsel</option>
