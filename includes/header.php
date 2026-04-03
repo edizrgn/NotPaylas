@@ -44,8 +44,17 @@ $navItems = [
                 </ul>
                 <div class="d-flex gap-2 auth-actions">
                     <?php if (isset($_SESSION['user_id'])): ?>
-                        <span class="d-flex align-items-center me-2">Merhaba, <?= htmlspecialchars($_SESSION['first_name']) ?></span>
-                        <a class="btn btn-sm btn-outline-danger" href="logout.php">Çıkış Yap</a>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle d-flex align-items-center gap-2" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa-solid fa-user"></i> <span><?= htmlspecialchars($_SESSION['first_name']) ?></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="userMenuButton">
+                                <li><a class="dropdown-item" href="profile.php"><i class="fa-solid fa-id-card ms-1 me-2 text-primary"></i>Profilim</a></li>
+                                <li><a class="dropdown-item" href="profile_edit.php"><i class="fa-solid fa-user-pen ms-1 me-2 text-primary"></i>Profili Düzenle</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="logout.php"><i class="fa-solid fa-right-from-bracket ms-1 me-2"></i>Çıkış Yap</a></li>
+                            </ul>
+                        </div>
                     <?php else: ?>
                         <a class="btn btn-sm btn-outline-primary" href="login.php">Giriş Yap</a>
                         <a class="btn btn-sm btn-primary" href="register.php">Kayıt Ol</a>
