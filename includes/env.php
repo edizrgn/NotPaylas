@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 /**
- * Read configuration values from process environment first, then .env in project root.
+ * Read configuration values from process environment first, then .env files.
  */
 function envValue(string $key, ?string $default = null): ?string
 {
@@ -14,9 +14,23 @@ function envValue(string $key, ?string $default = null): ?string
     static $envCache = null;
     if ($envCache === null) {
         $envCache = [];
-        $envPath = __DIR__ . '/etc/notbul/.env';
+        $envCandidates = [];
+        $configuredPath = getenv('NOTBUL_ENV_FILE');
+        if (is_string($configuredPath) && $configuredPath !== '') {
+            $envCandidates[] = $configuredPath;
+        }
+        $envCandidates[] = '/etc/notbul/.env';
+        $envCandidates[] = dirname(__DIR__) . '/.env';
 
-        if (is_readable($envPath)) {
+        $envPath = null;
+        foreach ($envCandidates as $candidatePath) {
+            if (is_readable($candidatePath)) {
+                $envPath = $candidatePath;
+                break;
+            }
+        }
+
+        if ($envPath !== null) {
             $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             if ($lines !== false) {
                 foreach ($lines as $line) {
