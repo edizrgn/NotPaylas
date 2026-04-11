@@ -151,7 +151,7 @@ $successMsg = isset($_GET['note_deleted']) && $_GET['note_deleted'] === '1'
                     <label class="form-label" for="homeDepartment">Bölüm</label>
                     <select class="form-select" id="homeDepartment" name="department_id" data-level="department" data-placeholder="Bölüm seç"></select>
                 </div>
-                <div class="col-12 col-lg">
+                <div class="col-6 col-lg">
                     <label class="form-label" for="homeCourse">Ders</label>
                     <select class="form-select" id="homeCourse" name="course" data-level="course" data-placeholder="Ders seç"></select>
                 </div>
