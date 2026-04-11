@@ -36,7 +36,7 @@
         <div class="footer-bottom mt-4 pt-3">
             <p class="footer-bottom-brand mb-0">Not Bul | notbul.site</p>
             <div class="footer-legal-notes">
-                <p class="mb-0">Kullanıcılar tarafından yüklenen içeriklerin sorumluluğu yükleyene aittir.</p>
+                <p class="mb-0">Bu proje eğitim amaçlı geliştirilmekte olup aktif olarak test edilmektedir.</p>
                 <p class="mb-0">Platform kodları MIT lisansı ile lisanslanmıştır.</p>
             </div>
         </div>
