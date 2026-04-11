@@ -125,7 +125,7 @@ require __DIR__ . '/includes/header.php';
                             </div>
                             <div class="col-12">
                                 <label for="email" class="form-label">E-posta Adresi</label>
-                                <input type="email" class="form-control" id="email" name="email" required placeholder="ornek@universite.edu.tr">
+                                <input type="email" class="form-control" id="email" name="email" required placeholder="ornek@email.com">
                             </div>
                             <div class="col-md-6">
                                 <label for="password" class="form-label">Şifre</label>

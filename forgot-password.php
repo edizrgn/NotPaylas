@@ -87,7 +87,7 @@ require __DIR__ . '/includes/header.php';
                                 id="email"
                                 name="email"
                                 required
-                                placeholder="ornek@universite.edu.tr"
+                                placeholder="ornek@email.com"
                                 value="<?= htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                             >
                         </div>

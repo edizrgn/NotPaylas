@@ -62,7 +62,7 @@ require __DIR__ . '/includes/header.php';
                     <form action="login.php" method="POST">
                         <div class="mb-3">
                             <label for="email" class="form-label">E-posta Adresi</label>
-                            <input type="email" class="form-control" id="email" name="email" required placeholder="ornek@universite.edu.tr">
+                            <input type="email" class="form-control" id="email" name="email" required placeholder="ornek@email.com">
                         </div>
                         <div class="mb-4">
                             <label for="password" class="form-label">Şifre</label>
