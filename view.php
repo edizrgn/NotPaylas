@@ -42,19 +42,10 @@ if (!file_exists($filePath)) {
 
 if ($isDownload) {
     try {
-        $columnCheckStmt = $pdo->query("SHOW COLUMNS FROM notes LIKE 'download_count'");
-        $hasDownloadCount = (bool)$columnCheckStmt->fetch();
+        $incrementStmt = $pdo->prepare("UPDATE notes SET download_count = download_count + 1 WHERE id = :id");
+        $incrementStmt->execute(['id' => $id]);
     } catch (Throwable $e) {
-        $hasDownloadCount = false;
-    }
-
-    if ($hasDownloadCount) {
-        try {
-            $incrementStmt = $pdo->prepare("UPDATE notes SET download_count = download_count + 1 WHERE id = :id");
-            $incrementStmt->execute(['id' => $id]);
-        } catch (Throwable $e) {
-            error_log('view.php download_count update error: ' . $e->getMessage());
-        }
+        error_log('view.php download_count update error: ' . $e->getMessage());
     }
 }
 

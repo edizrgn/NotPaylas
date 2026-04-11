@@ -157,18 +157,75 @@
         const topicInput = group.querySelector('input[data-level="topic-input"]');
         const courseDatalist = group.querySelector('#uploadCourseList');
         const topicDatalist = group.querySelector('#uploadTopicList');
+        const allNotes = getAllNotes();
+        const useNotesScopedOptions = group.dataset.optionsScope === 'notes' && allNotes.length > 0;
+        const departmentTypeOptions = [
+            { id: 'onlisans', name: 'Önlisans' },
+            { id: 'lisans', name: 'Lisans' }
+        ];
 
-        populateSelect(university, REMOTE.universities, university?.dataset.placeholder || 'Seçiniz', true);
-        populateSelect(classSelect, CLASS_OPTIONS, classSelect?.dataset.placeholder || 'Seçiniz', true);
-        populateSelect(
-            departmentType,
-            [
-                { id: 'onlisans', name: 'Önlisans' },
-                { id: 'lisans', name: 'Lisans' }
-            ],
-            departmentType?.dataset.placeholder || 'Seçiniz',
-            true
+        const getAvailableIds = (notes, key) => new Set(
+            notes
+                .map((note) => (note[key] || '').toString().trim())
+                .filter(Boolean)
         );
+
+        const refreshUniversities = () => {
+            if (!university) {
+                return;
+            }
+
+            if (!useNotesScopedOptions) {
+                populateSelect(university, REMOTE.universities, university.dataset.placeholder || 'Seçiniz', true);
+                return;
+            }
+
+            const availableUniversityIds = getAvailableIds(allNotes, 'universityId');
+            const missingUniversities = [...availableUniversityIds]
+                .filter((id) => !REMOTE.universitiesById.has(id))
+                .map((id) => ({ id, name: id }));
+            const list = REMOTE.universities
+                .filter((item) => availableUniversityIds.has(item.id))
+                .concat(missingUniversities)
+                .sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+
+            populateSelect(university, list, university.dataset.placeholder || 'Seçiniz', true);
+        };
+
+        const refreshDepartmentTypes = () => {
+            if (!departmentType) {
+                return;
+            }
+
+            if (!useNotesScopedOptions) {
+                populateSelect(
+                    departmentType,
+                    departmentTypeOptions,
+                    departmentType.dataset.placeholder || 'Seçiniz',
+                    true
+                );
+                return;
+            }
+
+            const selectedUniversity = university ? university.value : '';
+            const scopedNotes = allNotes.filter((note) => {
+                if (selectedUniversity && note.universityId !== selectedUniversity) {
+                    return false;
+                }
+                return true;
+            });
+            const availableDepartmentTypes = getAvailableIds(scopedNotes, 'departmentType');
+            const list = departmentTypeOptions.filter((item) => availableDepartmentTypes.has(item.id));
+
+            populateSelect(
+                departmentType,
+                list,
+                departmentType.dataset.placeholder || 'Seçiniz',
+                true
+            );
+        };
+
+        populateSelect(classSelect, CLASS_OPTIONS, classSelect?.dataset.placeholder || 'Seçiniz', true);
 
         const refreshDepartments = () => {
             if (!department) {
@@ -176,12 +233,40 @@
             }
 
             const selectedType = departmentType ? departmentType.value : '';
-            const list = selectedType
-                ? (REMOTE.departmentsByType[selectedType] || [])
-                : [];
             const placeholder = selectedType
                 ? (department.dataset.placeholder || 'Seçiniz')
                 : 'Önce program türü seçiniz';
+
+            if (!selectedType) {
+                populateSelect(department, [], placeholder, true);
+                return;
+            }
+
+            if (!useNotesScopedOptions) {
+                const list = REMOTE.departmentsByType[selectedType] || [];
+                populateSelect(department, list, placeholder, true);
+                return;
+            }
+
+            const selectedUniversity = university ? university.value : '';
+            const scopedNotes = allNotes.filter((note) => {
+                if (note.departmentType !== selectedType) {
+                    return false;
+                }
+                if (selectedUniversity && note.universityId !== selectedUniversity) {
+                    return false;
+                }
+                return true;
+            });
+            const availableDepartmentIds = getAvailableIds(scopedNotes, 'departmentId');
+            const baseList = REMOTE.departmentsByType[selectedType] || [];
+            const missingDepartments = [...availableDepartmentIds]
+                .filter((id) => !REMOTE.departmentsById.has(id))
+                .map((id) => ({ id, name: id }));
+            const list = baseList
+                .filter((item) => availableDepartmentIds.has(item.id))
+                .concat(missingDepartments)
+                .sort((a, b) => a.name.localeCompare(b.name, 'tr'));
 
             populateSelect(department, list, placeholder, true);
         };
@@ -248,6 +333,8 @@
             }
         };
 
+        refreshUniversities();
+        refreshDepartmentTypes();
         refreshDepartments();
         refreshCourse();
         refreshTopic();
@@ -259,11 +346,19 @@
             group.dispatchEvent(new Event('hierarchy:changed'));
         });
 
-        [university, department].forEach((element) => element?.addEventListener('change', () => {
+        university?.addEventListener('change', () => {
+            refreshDepartmentTypes();
+            refreshDepartments();
             refreshCourse();
             refreshTopic();
             group.dispatchEvent(new Event('hierarchy:changed'));
-        }));
+        });
+
+        department?.addEventListener('change', () => {
+            refreshCourse();
+            refreshTopic();
+            group.dispatchEvent(new Event('hierarchy:changed'));
+        });
 
         classSelect?.addEventListener('change', () => {
             refreshCourse();
@@ -354,22 +449,39 @@
         return notes.filter((note) => matchesFilters(note, filters));
     }
 
+    function shortenText(value, maxLength = 80) {
+        const text = (value || '').toString().trim();
+        if (!text) {
+            return 'Açıklama eklenmemiş.';
+        }
+        if (text.length <= maxLength) {
+            return text;
+        }
+        return `${text.slice(0, maxLength)}...`;
+    }
+
     function noteCardTemplate(note) {
-        const tagHtml = (note.tags || []).slice(0, 3).map((tag) => `<span class="note-tag">#${escapeHtml(tag)}</span>`).join('');
+        const tagHtml = (note.tags || [])
+            .slice(0, 2)
+            .map((tag) => `<span class="badge bg-light text-secondary fw-normal">#${escapeHtml(tag)}</span>`)
+            .join('');
+        const course = resolveCourseName(note) || '-';
+
         return `
             <article class="col-sm-6 col-xl-4">
-                <div class="note-card card">
+                <div class="note-card card shadow-sm border-0">
                     <div class="card-body">
-                        <h3 class="h6 mb-2">${escapeHtml(note.title)}</h3>
-                        <p class="text-secondary mb-3">${escapeHtml(note.description)}</p>
-                        <div class="note-tags">${tagHtml}</div>
-                        <div class="meta-row">
-                            <span>${escapeHtml(note.uploader)}</span>
-                            <span>${formatNumber(note.downloads)} indirme</span>
-                        </div>
-                        <div class="meta-row">
-                            <span>${formatNumber(note.views)} görüntülenme</span>
-                            <a href="note-detail.php?id=${note.id}" class="text-primary text-decoration-none fw-semibold">Detay</a>
+                        <h3 class="h6 mb-2 text-truncate">${escapeHtml(note.title)}</h3>
+                        <p class="text-secondary mb-3 small" style="height: 3em; overflow: hidden;">
+                            ${escapeHtml(shortenText(note.description))}
+                        </p>
+                        <div class="note-tags mb-3">${tagHtml}</div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="small">
+                                <div class="fw-bold text-dark">${escapeHtml(note.uploader || '-')}</div>
+                                <div class="text-secondary">${escapeHtml(course)}</div>
+                            </div>
+                            <a href="note-detail.php?id=${note.id}" class="btn btn-sm btn-primary">Detay</a>
                         </div>
                     </div>
                 </div>
@@ -396,16 +508,37 @@
         }
 
         const popularGrid = document.getElementById('popularNotesGrid');
-        const latestGrid = document.getElementById('latestNotesGrid');
+        const primaryTitle = document.getElementById('homePrimaryPanelTitle');
         const resultCount = document.getElementById('homeResultCount');
 
-        const render = () => {
-            const filtered = filterNotes(collectFilters(form));
-            const popular = [...filtered].sort((a, b) => b.downloads - a.downloads).slice(0, 6);
-            const latest = [...filtered].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6);
+        const hasActiveSearch = (filters) => Object.values(filters).some((value) => value !== '');
 
-            renderGrid(popularGrid, popular, 'Bu filtreye uygun popüler not bulunamadı.');
-            renderGrid(latestGrid, latest, 'Bu filtreye uygun yeni not bulunamadı.');
+        const render = () => {
+            const filters = collectFilters(form);
+            const filtered = filterNotes(filters);
+            const searchActive = hasActiveSearch(filters);
+
+            const notesToShow = searchActive
+                ? [...filtered].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6)
+                : [...getAllNotes()]
+                    .sort((a, b) => {
+                        const downloadDiff = (b.downloads || 0) - (a.downloads || 0);
+                        if (downloadDiff !== 0) {
+                            return downloadDiff;
+                        }
+                        return new Date(b.createdAt) - new Date(a.createdAt);
+                    })
+                    .slice(0, 6);
+
+            renderGrid(
+                popularGrid,
+                notesToShow,
+                searchActive ? 'Arama kriterlerine uygun not bulunamadı.' : 'Henüz popüler not bulunmuyor.'
+            );
+
+            if (primaryTitle) {
+                primaryTitle.textContent = searchActive ? 'Arama Sonuçları' : 'Popüler Notlar';
+            }
 
             if (resultCount) {
                 resultCount.textContent = formatNumber(filtered.length);
@@ -415,6 +548,10 @@
         form.addEventListener('input', render);
         form.addEventListener('change', render);
         form.addEventListener('hierarchy:changed', render);
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            render();
+        });
         render();
     }
 
@@ -773,7 +910,7 @@
 
         const page = document.body.dataset.page;
         if (page === 'home') {
-            // initHomePage(); // Devredışı bırakıldı: index.php artık veritabanından gerçek verileri çekiyor.
+            initHomePage();
         }
         if (page === 'upload') {
             initUploadPage();

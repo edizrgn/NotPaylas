@@ -13,17 +13,6 @@ try {
 }
 
 if (!$dbUnavailable) {
-    $downloadCountSelect = '0 AS download_count';
-
-    try {
-        $columnCheckStmt = $pdo->query("SHOW COLUMNS FROM notes LIKE 'download_count'");
-        if ($columnCheckStmt->fetch()) {
-            $downloadCountSelect = 'n.download_count AS download_count';
-        }
-    } catch (Throwable $e) {
-        $downloadCountSelect = '0 AS download_count';
-    }
-
     try {
         $stmt = $pdo->query("
             SELECT
@@ -39,7 +28,7 @@ if (!$dbUnavailable) {
                 n.tags,
                 n.original_filename,
                 n.mime_type,
-                {$downloadCountSelect},
+                n.download_count AS download_count,
                 n.created_at,
                 u.first_name,
                 u.last_name
@@ -98,7 +87,7 @@ require __DIR__ . '/includes/header.php';
         </div>
         <div class="row g-4 align-items-start">
             <aside class="col-lg-4 col-xl-3">
-                <form id="searchFilterForm" class="panel-card" data-hierarchy-group data-filter-source="public">
+                <form id="searchFilterForm" class="panel-card" data-hierarchy-group data-filter-source="public" data-options-scope="notes">
                     <h2 class="h5 mb-3">Detaylı Filtreler</h2>
 
                     <div class="mb-3">
