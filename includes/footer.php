@@ -10,11 +10,10 @@
             </div>
             <div class="col-6 col-lg-3">
                 <h3 class="footer-title">Anasayfa</h3>
-                <ul class="footer-list">
-                    <li><a href="index.php">Üniversiteler</a></li>
-                    <li><a href="search.php">Dersler</a></li>
+                <ul class="footer-list">                    
                     <li><a href="#">Giriş Yap</a></li>
                     <li><a href="#">Kayıt Ol</a></li>
+
                 </ul>
             </div>
             <div class="col-6 col-lg-3">
@@ -22,17 +21,14 @@
                 <ul class="footer-list">
                     <li><a href="upload.php">Not Yükle</a></li>
                     <li><a href="search.php">Ders Notu Bul</a></li>
-                    <li><a href="#">Topluluk</a></li>
-                    <li><a href="#">Duyurular</a></li>
+                    
                 </ul>
             </div>
             <div class="col-6 col-lg-3">
                 <h3 class="footer-title">Sosyal</h3>
                 <ul class="footer-list">
                     <li><a href="https://github.com/edizrgn/notbul">GitHub</a></li>
-                    <li><a href="#">Instagram</a></li>
-                    <li><a href="#">YouTube</a></li>
-                    <li><a href="#">X</a></li>
+                    
                 </ul>
             </div>
         </div>
