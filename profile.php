@@ -283,7 +283,7 @@ require __DIR__ . '/includes/header.php';
                 </div>
 
                 <div class="panel-card mt-4">
-                    <h2 class="h4 mb-3">Silinen Notlar</h2>
+                    <h2 class="h4 mb-3">Arşivlenen Notlar</h2>
 
                     <?php if (empty($deletedNotes)): ?>
                         <div class="empty-state">
