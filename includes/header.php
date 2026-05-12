@@ -44,20 +44,30 @@ $navItems = [
                 </ul>
                 <div class="d-flex gap-2 auth-actions">
                     <?php if (isset($_SESSION['user_id'])): ?>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle d-flex align-items-center gap-2" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fa-solid fa-user"></i> <span><?= htmlspecialchars($_SESSION['first_name']) ?></span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="userMenuButton">
-                                <?php if (($_SESSION['role'] ?? 'user') === 'admin'): ?>
-                                    <li><a class="dropdown-item" href="admin.php"><i class="fa-solid fa-gauge-high ms-1 me-2 text-primary"></i>Admin Paneli</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                <?php endif; ?>
-                                <li><a class="dropdown-item" href="profile.php"><i class="fa-solid fa-id-card ms-1 me-2 text-primary"></i>Profilim</a></li>
-                                <li><a class="dropdown-item" href="profile_edit.php"><i class="fa-solid fa-user-pen ms-1 me-2 text-primary"></i>Profili Düzenle</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger" href="logout.php"><i class="fa-solid fa-right-from-bracket ms-1 me-2"></i>Çıkış Yap</a></li>
-                            </ul>
+                        <?php
+                            $currentFirstName = trim((string)($_SESSION['first_name'] ?? ''));
+                            $displayFirstName = $currentFirstName !== '' ? $currentFirstName : 'Hesabım';
+                            $userInitial = mb_strtoupper(mb_substr($displayFirstName, 0, 1, 'UTF-8'), 'UTF-8');
+                        ?>
+                        <div class="user-quickbar" aria-label="Kullanıcı işlemleri">
+                            <a class="user-chip <?= $pageKey === 'profile' ? 'active' : ''; ?>" href="profile.php" aria-label="Profilim">
+                                <span class="user-avatar" aria-hidden="true"><?= htmlspecialchars($userInitial, ENT_QUOTES, 'UTF-8') ?></span>
+                                <span class="user-chip-copy">
+                                    <span class="user-chip-label">Profilim</span>
+                                    <span class="user-chip-name"><?= htmlspecialchars($displayFirstName, ENT_QUOTES, 'UTF-8') ?></span>
+                                </span>
+                            </a>
+                            <?php if (($_SESSION['role'] ?? 'user') === 'admin'): ?>
+                                <a class="header-action-btn <?= $pageKey === 'admin' ? 'active' : ''; ?>" href="admin.php" title="Admin Paneli" aria-label="Admin Paneli">
+                                    <i class="fa-solid fa-gauge-high" aria-hidden="true"></i>
+                                </a>
+                            <?php endif; ?>
+                            <a class="header-action-btn" href="profile_edit.php" title="Profili Düzenle" aria-label="Profili Düzenle">
+                                <i class="fa-solid fa-user-pen" aria-hidden="true"></i>
+                            </a>
+                            <a class="header-action-btn header-action-danger" href="logout.php" title="Çıkış Yap" aria-label="Çıkış Yap">
+                                <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+                            </a>
                         </div>
                     <?php else: ?>
                         <a class="btn btn-sm btn-outline-primary" href="login.php">Giriş Yap</a>
