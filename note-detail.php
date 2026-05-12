@@ -230,6 +230,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_c
     }
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_comment') {
+    $currentUserId = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
+    $commentId = (int)($_POST['comment_id'] ?? 0);
+    $requestToken = (string)($_POST['csrf_token'] ?? '');
+    $sessionToken = (string)($_SESSION['csrf_token_note_comment'] ?? '');
+
+    if ($currentUserId <= 0) {
+        $commentError = 'Yorum silmek için giriş yapmalısınız.';
+    } elseif ($commentId <= 0) {
+        $commentError = 'Geçersiz yorum işlemi.';
+    } elseif ($sessionToken === '' || !hash_equals($sessionToken, $requestToken)) {
+        $commentError = 'Güvenlik doğrulaması başarısız oldu. Lütfen tekrar deneyin.';
+    } else {
+        try {
+            $stmt = $pdo->prepare("
+                DELETE FROM note_comments
+                WHERE id = :id
+                  AND note_id = :note_id
+                  AND user_id = :user_id
+                LIMIT 1
+            ");
+            $stmt->execute([
+                'id' => $commentId,
+                'note_id' => $id,
+                'user_id' => $currentUserId,
+            ]);
+
+            if ($stmt->rowCount() < 1) {
+                $commentError = 'Yorum silinemedi. Yorum size ait olmayabilir.';
+            } else {
+                header("Location: note-detail.php?id=$id&comment_deleted=1#comments");
+                exit;
+            }
+        } catch (Throwable $e) {
+            error_log('note-detail delete comment error: ' . $e->getMessage());
+            $commentError = 'Yorum silinirken beklenmeyen bir hata oluştu.';
+        }
+    }
+}
+
 try {
     $stmt = $pdo->prepare("
         SELECT n.*, u.first_name, u.last_name 
@@ -406,6 +446,10 @@ require __DIR__ . '/includes/header.php';
                     <?php endif; ?>
                     <?php if (isset($_GET['comment_added'])): ?>
                         <div class="alert alert-success">Yorumunuz başarıyla eklendi.</div>
+                    <?php elseif (isset($_GET['comment_updated'])): ?>
+                        <div class="alert alert-success">Yorumunuz başarıyla güncellendi.</div>
+                    <?php elseif (isset($_GET['comment_deleted'])): ?>
+                        <div class="alert alert-success">Yorumunuz başarıyla silindi.</div>
                     <?php endif; ?>
 
                     <?php if (isset($_SESSION['user_id'])): ?>
@@ -436,18 +480,38 @@ require __DIR__ . '/includes/header.php';
                         <div class="alert alert-info">Yorum yapabilmek için <a href="login.php">giriş yapmalısınız</a>.</div>
                     <?php endif; ?>
 
-                    <div class="comments-list">
+                    <div id="comments" class="comments-list">
                         <?php if (empty($comments)): ?>
                             <p class="text-secondary">Henüz yorum yapılmamış. İlk yorumu siz yapın!</p>
                         <?php else: ?>
                             <?php foreach ($comments as $comment): ?>
+                                <?php $isCommentOwner = isset($_SESSION['user_id']) && (int)$_SESSION['user_id'] === (int)$comment['user_id']; ?>
                                 <article class="comment-item p-3 border rounded mb-3 bg-light">
-                                    <header class="d-flex justify-content-between align-items-center mb-2">
-                                        <strong><?= htmlspecialchars($comment['first_name'] . ' ' . $comment['last_name']) ?></strong>
-                                        <span class="text-secondary small">
-                                            <?= htmlspecialchars((string)$comment['rating']) ?>/5 | 
-                                            <?= date('d.m.Y H:i', strtotime((string)$comment['created_at'])) ?>
-                                        </span>
+                                    <header class="d-flex justify-content-between align-items-start gap-3 mb-2 flex-wrap">
+                                        <div>
+                                            <strong><?= htmlspecialchars($comment['first_name'] . ' ' . $comment['last_name']) ?></strong>
+                                            <div class="text-secondary small">
+                                                <?= htmlspecialchars((string)$comment['rating']) ?>/5 | 
+                                                <?= date('d.m.Y H:i', strtotime((string)$comment['created_at'])) ?>
+                                            </div>
+                                        </div>
+                                        <?php if ($isCommentOwner): ?>
+                                            <div class="d-flex gap-2 flex-wrap">
+                                                <a class="btn btn-sm btn-outline-primary" href="comment-edit.php?id=<?= (int)$comment['id'] ?>&amp;return=note">Düzenle</a>
+                                                <form method="POST" action="note-detail.php?id=<?= (int)$note['id'] ?>#comments" class="d-inline-block">
+                                                    <input type="hidden" name="action" value="delete_comment">
+                                                    <input type="hidden" name="comment_id" value="<?= (int)$comment['id'] ?>">
+                                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($commentToken, ENT_QUOTES, 'UTF-8') ?>">
+                                                    <button
+                                                        type="submit"
+                                                        class="btn btn-sm btn-outline-danger"
+                                                        onclick="return confirm('Bu yorumu kalıcı olarak silmek istediğinize emin misiniz?');"
+                                                    >
+                                                        Sil
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        <?php endif; ?>
                                     </header>
                                     <p class="mb-0 text-break"><?= nl2br(htmlspecialchars($comment['comment'])) ?></p>
                                 </article>

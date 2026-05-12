@@ -36,16 +36,41 @@ $noteActionError = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = (string)($_POST['action'] ?? '');
     $noteId = isset($_POST['note_id']) ? (int)$_POST['note_id'] : 0;
+    $commentId = isset($_POST['comment_id']) ? (int)$_POST['comment_id'] : 0;
     $requestToken = (string)($_POST['csrf_token'] ?? '');
     $sessionToken = (string)($_SESSION['csrf_token_profile_note_action'] ?? '');
 
-    if ($noteId <= 0 || !in_array($action, ['soft_delete_note', 'restore_note'], true)) {
-        $noteActionError = 'Geçersiz not işlemi.';
+    if (!in_array($action, ['soft_delete_note', 'restore_note', 'delete_comment'], true)) {
+        $noteActionError = 'Geçersiz işlem.';
     } elseif ($sessionToken === '' || !hash_equals($sessionToken, $requestToken)) {
         $noteActionError = 'Güvenlik doğrulaması başarısız oldu. Sayfayı yenileyip tekrar deneyin.';
     } else {
         try {
-            if ($action === 'soft_delete_note') {
+            if ($action === 'delete_comment') {
+                if ($commentId <= 0) {
+                    $noteActionError = 'Geçersiz yorum işlemi.';
+                } else {
+                    $actionStmt = $pdo->prepare("
+                        DELETE FROM note_comments
+                        WHERE id = :id
+                          AND user_id = :user_id
+                        LIMIT 1
+                    ");
+                    $actionStmt->execute([
+                        'id' => $commentId,
+                        'user_id' => $userId
+                    ]);
+
+                    if ($actionStmt->rowCount() > 0) {
+                        header('Location: profile.php?comment_deleted=1#comments');
+                        exit;
+                    }
+
+                    $noteActionError = 'Yorum silinemedi. Yorum size ait olmayabilir.';
+                }
+            } elseif ($noteId <= 0) {
+                $noteActionError = 'Geçersiz not işlemi.';
+            } elseif ($action === 'soft_delete_note') {
                 $actionStmt = $pdo->prepare("
                     UPDATE notes
                     SET deleted_at = NOW(),
@@ -106,6 +131,10 @@ $stmtDeletedCount = $pdo->prepare("SELECT COUNT(*) as deleted_count FROM notes W
 $stmtDeletedCount->execute(['uid' => $userId]);
 $deletedNoteCount = (int) $stmtDeletedCount->fetch()['deleted_count'];
 
+$stmtCommentCount = $pdo->prepare("SELECT COUNT(*) as comment_count FROM note_comments WHERE user_id = :uid");
+$stmtCommentCount->execute(['uid' => $userId]);
+$commentCount = (int)$stmtCommentCount->fetch()['comment_count'];
+
 $stmtMyNotes = $pdo->prepare("
     SELECT id, title, course, topic, original_filename, file_size, download_count, upload_status, scan_status, created_at
     FROM notes
@@ -128,11 +157,38 @@ $stmtDeletedNotes = $pdo->prepare("
 $stmtDeletedNotes->execute(['uid' => $userId]);
 $deletedNotes = $stmtDeletedNotes->fetchAll();
 
+$stmtMyComments = $pdo->prepare("
+    SELECT
+        nc.id,
+        nc.note_id,
+        nc.rating,
+        nc.comment,
+        nc.created_at,
+        n.title AS note_title,
+        n.course AS note_course,
+        n.deleted_at AS note_deleted_at,
+        n.upload_status,
+        n.scan_status
+    FROM note_comments nc
+    JOIN notes n ON n.id = nc.note_id
+    WHERE nc.user_id = :uid
+    ORDER BY nc.created_at DESC
+    LIMIT 12
+");
+$stmtMyComments->execute(['uid' => $userId]);
+$myComments = $stmtMyComments->fetchAll();
+
 $noteActionSuccess = '';
 if (isset($_GET['note_deleted']) && $_GET['note_deleted'] === '1') {
     $noteActionSuccess = 'Not başarıyla arşive alındı. Dilerseniz aşağıdaki "Silinen Notlar" bölümünden geri alabilirsiniz.';
 } elseif (isset($_GET['note_restored']) && $_GET['note_restored'] === '1') {
     $noteActionSuccess = 'Not başarıyla geri alındı ve tekrar listelere dahil edildi.';
+} elseif (isset($_GET['comment_updated']) && $_GET['comment_updated'] === '1') {
+    $noteActionSuccess = 'Yorum başarıyla güncellendi.';
+} elseif (isset($_GET['comment_deleted']) && $_GET['comment_deleted'] === '1') {
+    $noteActionSuccess = 'Yorum başarıyla silindi.';
+} elseif (isset($_GET['comment_error']) && $_GET['comment_error'] === 'not_found') {
+    $noteActionError = 'Yorum bulunamadı veya size ait değil.';
 }
 
 $pageTitle = 'Not Bul | Profilim';
@@ -204,6 +260,15 @@ require __DIR__ . '/includes/header.php';
                                 </div>
                                 <div class="col-sm-8 text-dark fw-medium">
                                     <?= $deletedNoteCount ?> not arşivde.
+                                </div>
+                            </div>
+                            <hr class="text-muted">
+                            <div class="row">
+                                <div class="col-sm-4 text-secondary">
+                                    <i class="fa-solid fa-comments me-2"></i>Yorumlar
+                                </div>
+                                <div class="col-sm-8 text-dark fw-medium">
+                                    <?= $commentCount ?> yorum yaptınız.
                                 </div>
                             </div>
                         </div>
@@ -319,6 +384,63 @@ require __DIR__ . '/includes/header.php';
                                                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($noteActionToken, ENT_QUOTES, 'UTF-8') ?>">
                                                 <button type="submit" class="btn btn-sm btn-outline-success">Geri Al</button>
                                             </form>
+                                        </div>
+                                    </div>
+                                </article>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <div id="comments" class="panel-card mt-4">
+                    <h2 class="h4 mb-3">Yorumlarım</h2>
+
+                    <?php if (empty($myComments)): ?>
+                        <div class="empty-state">
+                            Henüz yorum yapmadınız.
+                        </div>
+                    <?php else: ?>
+                        <div class="search-results">
+                            <?php foreach ($myComments as $comment): ?>
+                                <?php
+                                    $canViewNote = empty($comment['note_deleted_at'])
+                                        && (string)$comment['upload_status'] === 'ready'
+                                        && (string)$comment['scan_status'] === 'clean';
+                                ?>
+                                <article class="result-item">
+                                    <div class="my-note-item d-flex justify-content-between align-items-start gap-3">
+                                        <div class="my-note-main">
+                                            <h3 class="h6 mb-1"><?= htmlspecialchars((string)$comment['note_title'], ENT_QUOTES, 'UTF-8') ?></h3>
+                                            <p class="mb-2 text-secondary small">
+                                                <?= htmlspecialchars((string)($comment['note_course'] ?? '-'), ENT_QUOTES, 'UTF-8') ?>
+                                                • <?= (int)$comment['rating'] ?>/5
+                                                • <?= htmlspecialchars(date('d.m.Y H:i', strtotime((string)$comment['created_at'])), ENT_QUOTES, 'UTF-8') ?>
+                                                <?php if (!empty($comment['note_deleted_at'])): ?>
+                                                    • Not arşivde
+                                                <?php endif; ?>
+                                            </p>
+                                            <p class="mb-0 text-break"><?= nl2br(htmlspecialchars((string)$comment['comment'], ENT_QUOTES, 'UTF-8')) ?></p>
+                                        </div>
+
+                                        <div class="my-note-side text-end">
+                                            <div class="d-flex flex-wrap gap-2 justify-content-end">
+                                                <a class="btn btn-sm btn-outline-primary" href="comment-edit.php?id=<?= (int)$comment['id'] ?>&amp;return=profile">Düzenle</a>
+                                                <?php if ($canViewNote): ?>
+                                                    <a class="btn btn-sm btn-outline-secondary" href="note-detail.php?id=<?= (int)$comment['note_id'] ?>#comments">Notu Gör</a>
+                                                <?php endif; ?>
+                                                <form method="POST" action="profile.php#comments" class="d-inline-block">
+                                                    <input type="hidden" name="action" value="delete_comment">
+                                                    <input type="hidden" name="comment_id" value="<?= (int)$comment['id'] ?>">
+                                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($noteActionToken, ENT_QUOTES, 'UTF-8') ?>">
+                                                    <button
+                                                        type="submit"
+                                                        class="btn btn-sm btn-outline-danger"
+                                                        onclick="return confirm('Bu yorumu kalıcı olarak silmek istediğinize emin misiniz?');"
+                                                    >
+                                                        Sil
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </div>
                                     </div>
                                 </article>
