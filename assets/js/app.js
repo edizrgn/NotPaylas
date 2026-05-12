@@ -818,6 +818,17 @@
             return;
         }
 
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('q') && queryInput) {
+            queryInput.value = urlParams.get('q');
+        }
+
+        const similarToId = parseInt(urlParams.get('similar_to'), 10);
+        let similarNote = null;
+        if (!isNaN(similarToId) && similarToId > 0 && Array.isArray(window.NOTBUL_NOTES)) {
+            similarNote = window.NOTBUL_NOTES.find(n => n.id === similarToId);
+        }
+
         const state = {
             currentPage: 1,
             pageSize: 5,
@@ -885,8 +896,44 @@
                 filters.query = normalize(queryInput.value);
             }
 
-            state.filtered = filterNotes(filters)
-                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            let isCustomSort = false;
+            let resultNotes = filterNotes(filters);
+
+            if (similarNote && !filters.query && !Object.values(filters).some(v => v && typeof v === 'string' && v.trim() !== '')) {
+                const targetTags = (similarNote.tags || []).map(normalize).filter(Boolean);
+                const targetTitleWords = normalize(similarNote.title).split(/\s+/).filter(w => w.length > 2);
+                
+                resultNotes = resultNotes.filter(note => {
+                    if (note.id === similarNote.id) return false;
+                    
+                    const noteTags = (note.tags || []).map(normalize);
+                    const noteTitleWords = normalize(note.title).split(/\s+/);
+                    
+                    let score = 0;
+                    const sharedTags = noteTags.filter(t => targetTags.includes(t));
+                    score += sharedTags.length * 10;
+                    
+                    const sharedTitleWords = noteTitleWords.filter(w => w.length > 2 && targetTitleWords.includes(w));
+                    score += sharedTitleWords.length * 2;
+                    
+                    if (note.course === similarNote.course && similarNote.course) score += 5;
+                    
+                    if (score > 0) {
+                        note._similarScore = score;
+                        return true;
+                    }
+                    return false;
+                });
+                
+                resultNotes.sort((a, b) => b._similarScore - a._similarScore);
+                isCustomSort = true;
+            }
+
+            if (!isCustomSort) {
+                resultNotes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            }
+
+            state.filtered = resultNotes;
             state.currentPage = 1;
             drawResults();
         };
