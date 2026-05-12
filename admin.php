@@ -159,6 +159,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             adminRedirect('users');
         }
 
+        if ($action === 'delete_user') {
+            $targetUserId = (int)($_POST['user_id'] ?? 0);
+
+            if ($targetUserId <= 0) {
+                adminSetFlash('danger', 'Geçersiz kullanıcı silme isteği.');
+                adminRedirect('users');
+            }
+
+            $targetStmt = $pdo->prepare("SELECT id, first_name, last_name, email, role FROM users WHERE id = :id LIMIT 1");
+            $targetStmt->execute(['id' => $targetUserId]);
+            $targetUser = $targetStmt->fetch();
+
+            if (!$targetUser) {
+                adminSetFlash('danger', 'Silinecek kullanıcı bulunamadı.');
+                adminRedirect('users');
+            }
+
+            $adminCount = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role = 'admin'")->fetchColumn();
+            if (($targetUser['role'] ?? 'user') === 'admin' && $adminCount <= 1) {
+                adminSetFlash('warning', 'Sistemdeki son admin panelden silinemez. Gerekirse veritabanından manuel değişiklik yapabilirsiniz.');
+                adminRedirect('users');
+            }
+
+            $notesStmt = $pdo->prepare("SELECT * FROM notes WHERE user_id = :uid");
+            $notesStmt->execute(['uid' => $targetUserId]);
+            $notesToDelete = $notesStmt->fetchAll();
+
+            $pdo->beginTransaction();
+            $deleteStmt = $pdo->prepare("DELETE FROM users WHERE id = :id LIMIT 1");
+            $deleteStmt->execute(['id' => $targetUserId]);
+
+            if ($deleteStmt->rowCount() < 1) {
+                throw new RuntimeException('Admin user delete affected no rows.');
+            }
+
+            $pdo->commit();
+
+            $fileWarnings = deleteNotesStorageFiles($notesToDelete);
+            foreach ($fileWarnings as $warning) {
+                error_log('admin delete user file warning: ' . $warning);
+            }
+
+            if ($targetUserId === (int)$adminUser['id']) {
+                $_SESSION = [];
+                if (ini_get('session.use_cookies')) {
+                    $params = session_get_cookie_params();
+                    setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+                }
+                session_destroy();
+
+                header('Location: login.php?account_deleted=1');
+                exit;
+            }
+
+            if (!empty($fileWarnings)) {
+                adminSetFlash('warning', 'Kullanıcı silindi; bazı not dosyaları kaldırılamadı. Sunucu loglarını kontrol edin.');
+            } else {
+                adminSetFlash('success', 'Kullanıcı ve ilişkili kayıtları kalıcı olarak silindi.');
+            }
+            adminRedirect('users');
+        }
+
         if ($action === 'delete_note') {
             $noteId = (int)($_POST['note_id'] ?? 0);
 
@@ -191,6 +253,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         adminSetFlash('danger', 'Bilinmeyen admin işlemi.');
         adminRedirect();
     } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
         error_log('admin action error: ' . $e->getMessage());
         adminSetFlash('danger', 'İşlem sırasında beklenmeyen bir hata oluştu.');
         adminRedirect($redirectSection);
@@ -457,15 +522,30 @@ require __DIR__ . '/includes/header.php';
                                     </form>
                                 </td>
                                 <td class="text-end">
-                                    <form method="POST" action="admin.php#users" class="d-inline-block">
-                                        <input type="hidden" name="action" value="update_user_verified">
-                                        <input type="hidden" name="user_id" value="<?= (int)$user['id'] ?>">
-                                        <input type="hidden" name="verified" value="<?= $isVerified ? 0 : 1 ?>">
-                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
-                                        <button class="btn btn-sm <?= $isVerified ? 'btn-outline-secondary' : 'btn-outline-success' ?>" type="submit">
-                                            <?= $isVerified ? 'Doğrulamayı Kaldır' : 'Doğrula' ?>
-                                        </button>
-                                    </form>
+                                    <div class="d-flex justify-content-end gap-2 flex-wrap">
+                                        <form method="POST" action="admin.php#users" class="d-inline-block">
+                                            <input type="hidden" name="action" value="update_user_verified">
+                                            <input type="hidden" name="user_id" value="<?= (int)$user['id'] ?>">
+                                            <input type="hidden" name="verified" value="<?= $isVerified ? 0 : 1 ?>">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+                                            <button class="btn btn-sm <?= $isVerified ? 'btn-outline-secondary' : 'btn-outline-success' ?>" type="submit">
+                                                <?= $isVerified ? 'Doğrulamayı Kaldır' : 'Doğrula' ?>
+                                            </button>
+                                        </form>
+                                        <form
+                                            method="POST"
+                                            action="admin.php#users"
+                                            class="d-inline-block"
+                                            onsubmit="return confirm('Bu kullanıcı kalıcı olarak silinecek. Yüklediği tüm notlar, bu notlara yapılan yorumlar ve yaptığı yorumlar da silinir. Devam edilsin mi?') && confirm('İkinci onay: Bu işlemin geri dönüşü yok. Kullanıcıyı silmek istediğinizden emin misiniz?');"
+                                        >
+                                            <input type="hidden" name="action" value="delete_user">
+                                            <input type="hidden" name="user_id" value="<?= (int)$user['id'] ?>">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
+                                            <button class="btn btn-sm btn-outline-danger" type="submit" <?= $isLastAdmin ? 'disabled' : '' ?>>
+                                                Sil
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

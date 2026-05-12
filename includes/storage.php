@@ -68,3 +68,22 @@ function deleteNoteStorageFile(array $note): ?string
 
     return null;
 }
+
+function deleteNotesStorageFiles(array $notes): array
+{
+    $warnings = [];
+
+    foreach ($notes as $note) {
+        if (!is_array($note)) {
+            continue;
+        }
+
+        $warning = deleteNoteStorageFile($note);
+        if ($warning !== null) {
+            $noteId = isset($note['id']) ? (int)$note['id'] : 0;
+            $warnings[] = ($noteId > 0 ? 'Not #' . $noteId . ': ' : '') . $warning;
+        }
+    }
+
+    return $warnings;
+}

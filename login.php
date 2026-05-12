@@ -9,6 +9,8 @@ $success = '';
 
 if (isset($_GET['reset']) && $_GET['reset'] === 'success') {
     $success = 'Şifren başarıyla güncellendi. Yeni şifrenle giriş yapabilirsin.';
+} elseif (isset($_GET['account_deleted']) && $_GET['account_deleted'] === '1') {
+    $success = 'Hesabınız kalıcı olarak silindi.';
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

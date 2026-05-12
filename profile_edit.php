@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/includes/db.php';
+require_once __DIR__ . '/includes/storage.php';
 @session_start();
 
 if (!isset($_SESSION['user_id'])) {
@@ -100,6 +101,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'Şifre güncellenirken beklenmeyen bir hata oluştu.';
             }
         }
+    } elseif ($action === 'delete_account') {
+        $currentPassword = (string)($_POST['delete_current_password'] ?? '');
+        $confirmation = trim((string)($_POST['delete_confirmation'] ?? ''));
+
+        if ($currentPassword === '' || $confirmation === '') {
+            $error = 'Hesabı silmek için mevcut şifrenizi ve onay metnini girin.';
+        } elseif (!password_verify($currentPassword, (string)$user['password'])) {
+            $error = 'Mevcut şifreniz hatalı.';
+        } elseif ($confirmation !== 'HESABIMI SİL') {
+            $error = 'Hesabı silmek için onay alanına HESABIMI SİL yazmalısınız.';
+        } else {
+            try {
+                $notesStmt = $pdo->prepare("SELECT * FROM notes WHERE user_id = :uid");
+                $notesStmt->execute(['uid' => $userId]);
+                $notesToDelete = $notesStmt->fetchAll();
+
+                $pdo->beginTransaction();
+                $deleteStmt = $pdo->prepare("DELETE FROM users WHERE id = :uid LIMIT 1");
+                $deleteStmt->execute(['uid' => $userId]);
+
+                if ($deleteStmt->rowCount() < 1) {
+                    throw new RuntimeException('User delete affected no rows.');
+                }
+
+                $pdo->commit();
+
+                foreach (deleteNotesStorageFiles($notesToDelete) as $warning) {
+                    error_log('profile_edit delete account file warning: ' . $warning);
+                }
+
+                $_SESSION = [];
+                if (ini_get('session.use_cookies')) {
+                    $params = session_get_cookie_params();
+                    setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+                }
+                session_destroy();
+
+                header('Location: login.php?account_deleted=1');
+                exit;
+            } catch (Throwable $e) {
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                error_log('profile_edit delete account error: ' . $e->getMessage());
+                $error = 'Hesap silinirken beklenmeyen bir hata oluştu.';
+            }
+        }
     } else {
         $error = 'Geçersiz profil işlemi.';
     }
@@ -168,6 +216,33 @@ require __DIR__ . '/includes/header.php';
                         </div>
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-outline-primary"><i class="fa-solid fa-key"></i> Şifreyi Güncelle</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="panel-card mt-4 border border-danger-subtle">
+                    <h2 class="h4 mb-3 text-danger">Hesabı Sil</h2>
+                    <div class="alert alert-danger" role="alert">
+                        Bu işlem geri alınamaz. Hesabınızla birlikte yüklediğiniz tüm notlar, bu notlara yapılan yorumlar ve sizin yaptığınız yorumlar kalıcı olarak silinir.
+                    </div>
+                    <form
+                        action="profile_edit.php"
+                        method="POST"
+                        onsubmit="return confirm('Hesabınız kalıcı olarak silinecek. Tüm notlarınız ve yorumlarınız da silinir. Devam edilsin mi?') && confirm('İkinci onay: Bu işlemin geri dönüşü yok. Hesabınızı silmek istediğinizden emin misiniz?');"
+                    >
+                        <input type="hidden" name="action" value="delete_account">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($profileEditToken, ENT_QUOTES, 'UTF-8') ?>">
+                        <div class="mb-3">
+                            <label for="delete_current_password" class="form-label">Mevcut Şifre</label>
+                            <input type="password" class="form-control" id="delete_current_password" name="delete_current_password" autocomplete="current-password" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="delete_confirmation" class="form-label">Onay Metni</label>
+                            <input type="text" class="form-control" id="delete_confirmation" name="delete_confirmation" required placeholder="HESABIMI SİL">
+                            <div class="form-text">Devam etmek için alana tam olarak HESABIMI SİL yazın.</div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-outline-danger"><i class="fa-solid fa-triangle-exclamation"></i> Hesabımı Kalıcı Olarak Sil</button>
                         </div>
                     </form>
                 </div>
