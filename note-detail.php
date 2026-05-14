@@ -377,7 +377,7 @@ require __DIR__ . '/includes/header.php';
                         <strong>Dosya Önizleme</strong>
                         <span class="badge text-bg-info"><?= strtoupper(pathinfo($note['original_filename'], PATHINFO_EXTENSION)) ?> Önizleme</span>
                     </div>
-                    <div class="preview-canvas p-0" style="min-height: 500px; background: #f8f9fa;">
+                    <div class="preview-canvas document-preview p-0">
                         <?php 
                         $mime = $note['mime_type'];
                         if (strpos($mime, 'pdf') !== false): 

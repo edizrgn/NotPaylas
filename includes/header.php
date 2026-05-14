@@ -14,6 +14,35 @@ $navItems = [
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#eef3f8" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#10151f" media="(prefers-color-scheme: dark)">
+    <script>
+        (() => {
+            const root = document.documentElement;
+
+            if (!('matchMedia' in window)) {
+                root.dataset.theme = 'light';
+                root.dataset.bsTheme = 'light';
+                return;
+            }
+
+            const themeQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            const syncTheme = () => {
+                const theme = themeQuery.matches ? 'dark' : 'light';
+                root.dataset.theme = theme;
+                root.dataset.bsTheme = theme;
+            };
+
+            syncTheme();
+
+            if (typeof themeQuery.addEventListener === 'function') {
+                themeQuery.addEventListener('change', syncTheme);
+            } else if (typeof themeQuery.addListener === 'function') {
+                themeQuery.addListener(syncTheme);
+            }
+        })();
+    </script>
     <title><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?></title>
     <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
     <link rel="shortcut icon" href="assets/icons/favicon.svg">
@@ -24,7 +53,7 @@ $navItems = [
 <body data-page="<?= htmlspecialchars($pageKey, ENT_QUOTES, 'UTF-8'); ?>">
 <header class="site-header">
     <div class="container">
-        <nav class="navbar navbar-expand-lg navbar-light py-2">
+        <nav class="navbar navbar-expand-lg py-2">
             <a class="navbar-brand brand-mark" href="index.php">
                 <i class="fa-solid fa-book-open-reader brand-icon" aria-hidden="true"></i>
                 <span>Not Bul</span>
