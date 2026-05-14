@@ -86,6 +86,10 @@ require __DIR__ . '/includes/header.php';
                                 class="form-control"
                                 id="email"
                                 name="email"
+                                autocomplete="email"
+                                inputmode="email"
+                                autocapitalize="none"
+                                spellcheck="false"
                                 required
                                 placeholder="ornek@email.com"
                                 value="<?= htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>"

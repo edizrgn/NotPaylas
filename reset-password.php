@@ -102,11 +102,11 @@ require __DIR__ . '/includes/header.php';
                             <input type="hidden" name="token" value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
                             <div class="mb-3">
                                 <label for="password" class="form-label">Yeni Şifre</label>
-                                <input type="password" class="form-control" id="password" name="password" required placeholder="En az 8 karakter">
+                                <input type="password" class="form-control" id="password" name="password" autocomplete="new-password" minlength="8" required placeholder="En az 8 karakter">
                             </div>
                             <div class="mb-4">
                                 <label for="passwordConfirm" class="form-label">Yeni Şifre (Tekrar)</label>
-                                <input type="password" class="form-control" id="passwordConfirm" name="password_confirm" required placeholder="Şifreni tekrar gir">
+                                <input type="password" class="form-control" id="passwordConfirm" name="password_confirm" autocomplete="new-password" minlength="8" required placeholder="Şifreni tekrar gir">
                             </div>
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-primary">Şifreyi Güncelle</button>

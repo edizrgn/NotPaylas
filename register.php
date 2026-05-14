@@ -117,23 +117,23 @@ require __DIR__ . '/includes/header.php';
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="firstName" class="form-label">Ad</label>
-                                <input type="text" class="form-control" id="firstName" name="first_name" required placeholder="Adınız">
+                                <input type="text" class="form-control" id="firstName" name="first_name" autocomplete="given-name" required placeholder="Adınız">
                             </div>
                             <div class="col-md-6">
                                 <label for="lastName" class="form-label">Soyad</label>
-                                <input type="text" class="form-control" id="lastName" name="last_name" required placeholder="Soyadınız">
+                                <input type="text" class="form-control" id="lastName" name="last_name" autocomplete="family-name" required placeholder="Soyadınız">
                             </div>
                             <div class="col-12">
                                 <label for="email" class="form-label">E-posta Adresi</label>
-                                <input type="email" class="form-control" id="email" name="email" required placeholder="ornek@email.com">
+                                <input type="email" class="form-control" id="email" name="email" autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false" required placeholder="ornek@email.com">
                             </div>
                             <div class="col-md-6">
                                 <label for="password" class="form-label">Şifre</label>
-                                <input type="password" class="form-control" id="password" name="password" required placeholder="En az 8 karakter">
+                                <input type="password" class="form-control" id="password" name="password" autocomplete="new-password" minlength="8" required placeholder="En az 8 karakter">
                             </div>
                             <div class="col-md-6">
                                 <label for="passwordConfirm" class="form-label">Şifre (Tekrar)</label>
-                                <input type="password" class="form-control" id="passwordConfirm" name="password_confirm" required placeholder="Şifrenizi doğrulayın">
+                                <input type="password" class="form-control" id="passwordConfirm" name="password_confirm" autocomplete="new-password" minlength="8" required placeholder="Şifrenizi doğrulayın">
                             </div>
                         </div>
                         <div class="d-grid gap-2 mt-4">

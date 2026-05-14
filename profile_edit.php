@@ -179,15 +179,15 @@ require __DIR__ . '/includes/header.php';
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($profileEditToken, ENT_QUOTES, 'UTF-8') ?>">
                         <div class="mb-3">
                             <label for="first_name" class="form-label">Ad</label>
-                            <input type="text" class="form-control" id="first_name" name="first_name" value="<?= htmlspecialchars((string)$user['first_name'], ENT_QUOTES, 'UTF-8') ?>" required>
+                            <input type="text" class="form-control" id="first_name" name="first_name" autocomplete="given-name" value="<?= htmlspecialchars((string)$user['first_name'], ENT_QUOTES, 'UTF-8') ?>" required>
                         </div>
                         <div class="mb-3">
                             <label for="last_name" class="form-label">Soyad</label>
-                            <input type="text" class="form-control" id="last_name" name="last_name" value="<?= htmlspecialchars((string)$user['last_name'], ENT_QUOTES, 'UTF-8') ?>" required>
+                            <input type="text" class="form-control" id="last_name" name="last_name" autocomplete="family-name" value="<?= htmlspecialchars((string)$user['last_name'], ENT_QUOTES, 'UTF-8') ?>" required>
                         </div>
                         <div class="mb-4">
                             <label for="email" class="form-label">E-posta</label>
-                            <input type="email" class="form-control text-muted" id="email" value="<?= htmlspecialchars((string)$user['email'], ENT_QUOTES, 'UTF-8') ?>" readonly disabled>
+                            <input type="email" class="form-control text-muted" id="email" autocomplete="email" value="<?= htmlspecialchars((string)$user['email'], ENT_QUOTES, 'UTF-8') ?>" readonly disabled>
                             <div class="form-text">E-posta adresi değiştirilemez.</div>
                         </div>
                         <div class="d-grid gap-2">
@@ -238,7 +238,7 @@ require __DIR__ . '/includes/header.php';
                         </div>
                         <div class="mb-4">
                             <label for="delete_confirmation" class="form-label">Onay Metni</label>
-                            <input type="text" class="form-control" id="delete_confirmation" name="delete_confirmation" required placeholder="HESABIMI SİL">
+                            <input type="text" class="form-control" id="delete_confirmation" name="delete_confirmation" autocomplete="off" autocapitalize="characters" spellcheck="false" required placeholder="HESABIMI SİL">
                             <div class="form-text">Devam etmek için alana tam olarak HESABIMI SİL yazın.</div>
                         </div>
                         <div class="d-grid gap-2">
